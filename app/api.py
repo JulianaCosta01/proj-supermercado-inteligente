@@ -22,7 +22,10 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.config import Config
 from app.erros import http_de_banco
-from app import importacao
+from app import importacao, planta
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+import pathlib
 
 log = logging.getLogger("stp")
 PH = PasswordHasher()
@@ -80,7 +83,11 @@ def criar_app(cfg: Config | None = None) -> FastAPI:
         resp = await call_next(request)
         resp.headers["X-Content-Type-Options"] = "nosniff"
         resp.headers["Referrer-Policy"] = "no-referrer"
-        resp.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'"
+        if request.url.path.startswith("/ui"):
+            resp.headers["Content-Security-Policy"] = ("default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; "
+                                                       "connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'")
+        else:
+            resp.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'"
         resp.headers["Cache-Control"] = "no-store"
         return resp
 
@@ -266,4 +273,27 @@ def criar_app(cfg: Config | None = None) -> FastAPI:
             raise http_de_banco(e)
         return {"versao": v}
 
+    # ------------------------------------------------------------ planta 2D
+    @app.get("/planta")
+    def ver_planta(u: Usuario = Depends(usuario_atual)):
+        try:
+            with pool.connection() as c:
+                sint = c.execute("SELECT origem_dado = 'sintetico' FROM op.loja WHERE id = %s", (u.loja_id,)).fetchone()[0]
+                return {"faces": planta.montar(c, u.loja_id), "sintetico": sint}
+        except psycopg.Error as e:
+            raise http_de_banco(e)
+
+    @app.get("/capturas/{captura_id}/imagem")
+    def imagem_captura(captura_id: int, u: Usuario = Depends(usuario_atual)):
+        with pool.connection() as c:
+            r = c.execute("SELECT imagem_chave FROM op.captura WHERE id = %s AND loja_id = %s AND estado = 'processada'",
+                          (captura_id, u.loja_id)).fetchone()
+        if not r or not r[0]:
+            raise HTTPException(404, {"erro": "não encontrado"})
+        caminho = (cfg.imagens / r[0]).resolve()
+        if cfg.imagens.resolve() not in caminho.parents or not caminho.is_file():
+            raise HTTPException(404, {"erro": "não encontrado"})
+        return FileResponse(caminho, media_type="image/jpeg", headers={"Cache-Control": "private, max-age=300"})
+
+    app.mount("/ui", StaticFiles(directory=pathlib.Path(__file__).parent / "ui", html=True), name="ui")
     return app

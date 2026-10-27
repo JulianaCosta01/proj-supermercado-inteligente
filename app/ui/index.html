@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shelf-to-Profit · Planta</title>
+<link rel="stylesheet" href="estilo.css">
+<script src="app.js" defer></script>
+</head>
+<body>
+<header>
+  <h1>Shelf-to-Profit</h1>
+  <span id="usuario" class="discreto"></span>
+  <button id="sair" class="secundario" hidden>Sair</button>
+</header>
+
+<main>
+  <section id="tela-login" hidden>
+    <form id="form-login">
+      <h2>Entrar</h2>
+      <label>Login <input name="login" autocomplete="username" required minlength="3" maxlength="40"></label>
+      <label>Senha <input name="senha" type="password" autocomplete="current-password" required maxlength="200"></label>
+      <button type="submit">Entrar</button>
+      <p id="erro-login" class="erro" role="alert"></p>
+    </form>
+  </section>
+
+  <section id="tela-planta" hidden>
+    <div class="barra">
+      <ul id="legenda" aria-label="Legenda"></ul>
+      <button id="atualizar" class="secundario">Atualizar</button>
+    </div>
+    <p id="aviso-sintetico" class="aviso" hidden>Dados sintéticos de demonstração.</p>
+    <div id="faces"></div>
+  </section>
+
+  <aside id="painel" hidden aria-live="polite">
+    <button id="fechar-painel" class="secundario" aria-label="Fechar">×</button>
+    <div id="painel-conteudo"></div>
+  </aside>
+</main>
+</body>
+</html>
