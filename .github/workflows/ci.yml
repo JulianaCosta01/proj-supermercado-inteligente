@@ -1,0 +1,42 @@
+name: ci
+on:
+  pull_request:            # nunca pull_request_target: código de PR não recebe segredos
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 6 * * 1"   # semanal: pega vulnerabilidades novas sem depender de commit
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  testes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: ci-somente-teste      # credencial descartável do runner
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-retries 12
+    env:
+      STP_PG_HOST: localhost
+      STP_PG_PORT: "5432"
+      STP_PG_USER: postgres
+      STP_PG_PASSWORD: ci-somente-teste
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1    # v7.0.1
+        with: { persist-credentials: false }
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with: { python-version: "3.13" }
+      - run: pip install -r requirements-dev.txt
+      - name: Testes (banco via Alembic, API, importação, worker, regras, reconciliação)
+        run: python -m pytest -q tests
+      - name: Verificação por mutação (cada proteção precisa ser detectada)
+        run: python scripts/mutacoes.py
+      - name: Vulnerabilidades conhecidas nas dependências
+        run: pip install pip-audit==2.10.1 && pip-audit -r requirements.txt

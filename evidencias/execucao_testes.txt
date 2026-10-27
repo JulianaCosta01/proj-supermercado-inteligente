@@ -1,0 +1,158 @@
+Executado em 27/10/2026 (PostgreSQL 16.15, Python 3.13.18, Pillow 13.0.0)
+tests/app/test_api.py::test_login_e_senha_errada PASSED
+tests/app/test_api.py::test_desativar_usuario_derruba_sessao PASSED
+tests/app/test_api.py::test_logout_revoga PASSED
+tests/app/test_api.py::test_toda_rota_exige_sessao PASSED
+tests/app/test_api.py::test_matriz_de_papeis[analista-POST-/capturas-403] PASSED
+tests/app/test_api.py::test_matriz_de_papeis[repositor-POST-/importacoes/estoque-403] PASSED
+tests/app/test_api.py::test_matriz_de_papeis[gerente-POST-/importacoes/estoque-403] PASSED
+tests/app/test_api.py::test_matriz_de_papeis[repositor-GET-/importacoes/tentativas/1/relatorio.csv-403] PASSED
+tests/app/test_api.py::test_isolamento_entre_lojas PASSED
+tests/app/test_api.py::test_origem_diferente_recusada PASSED
+tests/app/test_api.py::test_cabecalhos_de_seguranca PASSED
+tests/app/test_api.py::test_upload_vai_para_quarentena PASSED
+tests/app/test_api.py::test_upload_idempotente PASSED
+tests/app/test_api.py::test_upload_recusa_formato[svg renomeado-<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>-415] PASSED
+tests/app/test_api.py::test_upload_recusa_formato[html-<!doctype html><script>alert(1)</script>-415] PASSED
+tests/app/test_api.py::test_upload_recusa_formato[gif-GIF89a\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00-415] PASSED
+tests/app/test_api.py::test_upload_recusa_formato[heic-\x00\x00\x00\x18ftypheic\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00-415] PASSED
+tests/app/test_api.py::test_upload_recusa_formato[vazio--400] PASSED
+tests/app/test_api.py::test_upload_recusa_formato[curto-\xff\xd8-415] PASSED
+tests/app/test_api.py::test_upload_grande_demais PASSED
+tests/app/test_api.py::test_upload_data_invalida[2026-10-20T10:00:00] PASSED
+tests/app/test_api.py::test_upload_data_invalida[2099-01-01T00:00:00+00:00] PASSED
+tests/app/test_api.py::test_upload_data_invalida[2020-01-01T00:00:00+00:00] PASSED
+tests/app/test_api.py::test_falha_no_banco_nao_deixa_arquivo PASSED
+tests/app/test_api.py::test_disco_sem_reserva PASSED
+tests/app/test_importacao.py::test_arquivo_valido PASSED
+tests/app/test_importacao.py::test_mesmo_arquivo_duas_vezes PASSED
+tests/app/test_importacao.py::test_arquivo_invalido_nao_grava_nada[cabecalho errado-cod;qtd\nC0;1\n] PASSED
+tests/app/test_importacao.py::test_arquivo_invalido_nao_grava_nada[colunas a mais-codigo;ean;descricao;quantidade;data\nC0;;x;1;2026-10-27;extra\n] PASSED
+tests/app/test_importacao.py::test_arquivo_invalido_nao_grava_nada[milhar amb\xedguo-codigo;ean;descricao;quantidade;data\nC0;;x;1.234;2026-10-27\n] PASSED
+tests/app/test_importacao.py::test_arquivo_invalido_nao_grava_nada[quantidade texto-codigo;ean;descricao;quantidade;data\nC0;;x;abc;2026-10-27\n] PASSED
+tests/app/test_importacao.py::test_arquivo_invalido_nao_grava_nada[quantidade enorme-codigo;ean;descricao;quantidade;data\nC0;;x;99999999;2026-10-27\n] PASSED
+tests/app/test_importacao.py::test_arquivo_invalido_nao_grava_nada[duas datas-codigo;ean;descricao;quantidade;data\nC0;;x;1;2026-10-27\nC1;;y;1;2026-01-01\n] PASSED
+tests/app/test_importacao.py::test_arquivo_invalido_nao_grava_nada[data futura-codigo;ean;descricao;quantidade;data\nC0;;x;1;2099-01-01\n] PASSED
+tests/app/test_importacao.py::test_arquivo_invalido_nao_grava_nada[data imposs\xedvel-codigo;ean;descricao;quantidade;data\nC0;;x;1;2026-02-30\n] PASSED
+tests/app/test_importacao.py::test_arquivo_invalido_nao_grava_nada[c\xf3digo repetido-codigo;ean;descricao;quantidade;data\nC0;;x;1;2026-10-27\nC0;;x;2;2026-10-27\n] PASSED
+tests/app/test_importacao.py::test_arquivo_invalido_nao_grava_nada[c\xf3digo repetido fora do cadastro-codigo;ean;descricao;quantidade;data\nZ9;;x;1;2026-10-27\nZ9;;x;2;2026-10-27\n] PASSED
+tests/app/test_importacao.py::test_arquivo_invalido_nao_grava_nada[ean com letras-codigo;ean;descricao;quantidade;data\nC0;78910A;x;1;2026-10-27\n] PASSED
+tests/app/test_importacao.py::test_arquivo_invalido_nao_grava_nada[c\xf3digo vazio-codigo;ean;descricao;quantidade;data\n;;x;1;2026-10-27\n] PASSED
+tests/app/test_importacao.py::test_arquivo_invalido_nao_grava_nada[caractere de controle-codigo;ean;descricao;quantidade;data\nC\x070;;x;1;2026-10-27\n] PASSED
+tests/app/test_importacao.py::test_arquivo_invalido_nao_grava_nada[bin\xe1rio-codigo;ean;descricao;quantidade;data\n\x00\x01\x02] PASSED
+tests/app/test_importacao.py::test_arquivo_invalido_nao_grava_nada[sem linhas-codigo;ean;descricao;quantidade;data\n] PASSED
+tests/app/test_importacao.py::test_arquivo_invalido_nao_grava_nada[aspas quebradas-codigo;ean;descricao;quantidade;data\nC0;;"x;1;2026-10-27\n] PASSED
+tests/app/test_importacao.py::test_arquivo_invalido_nao_grava_nada[uma linha ruim entre boas-codigo;ean;descricao;quantidade;data\nC0;;x;1;2026-10-27\nC1;;y;-;2026-10-27\nC2;;z;3;2026-10-27\n] PASSED
+tests/app/test_importacao.py::test_variacoes_aceitas[latin-1-codigo;ean;descricao;quantidade;data\nC0;;Caf\xe9 com a\xe7\xfacar;2;2026-10-27\n] PASSED
+tests/app/test_importacao.py::test_variacoes_aceitas[utf-8 com BOM-\xef\xbb\xbfcodigo;ean;descricao;quantidade;data\nC0;;Caf\xc3\xa9;2;2026-10-27\n] PASSED
+tests/app/test_importacao.py::test_variacoes_aceitas[data brasileira-codigo;ean;descricao;quantidade;data\nC0;;x;2;27/10/2026\n] PASSED
+tests/app/test_importacao.py::test_variacoes_aceitas[decimal com v\xedrgula e negativo-codigo;ean;descricao;quantidade;data\nC0;;x;-1,5;2026-10-27\n] PASSED
+tests/app/test_importacao.py::test_variacoes_aceitas[linhas em branco e CRLF-codigo;ean;descricao;quantidade;data\r\n\r\nC0;;x;2;2026-10-27\r\n\r\n] PASSED
+tests/app/test_importacao.py::test_variacoes_aceitas[f\xf3rmula na descri\xe7\xe3o \xe9 s\xf3 texto-codigo;ean;descricao;quantidade;data\nC0;;=HYPERLINK("http://x");2;2026-10-27\n] PASSED
+tests/app/test_importacao.py::test_relatorio_csv_neutraliza_formulas PASSED
+tests/app/test_importacao.py::test_relatorio_de_outra_loja PASSED
+tests/app/test_importacao.py::test_arquivo_grande_demais PASSED
+tests/app/test_reconciliacao.py::test_banco_fora_do_ar_nao_apaga_nada PASSED
+tests/app/test_reconciliacao.py::test_banco_vazio_com_arquivos_aborta PASSED
+tests/app/test_reconciliacao.py::test_trava_contra_exclusao_em_massa PASSED
+tests/app/test_reconciliacao.py::test_orfao_antigo_vai_para_lixeira_e_novo_fica PASSED
+tests/app/test_reconciliacao.py::test_quarentena_em_processamento_fica_e_finalizada_sai PASSED
+tests/app/test_reconciliacao.py::test_imagem_ausente_e_registrada PASSED
+tests/app/test_reconciliacao.py::test_lixeira_e_tmp_expiram PASSED
+tests/app/test_regras.py::test_regra[fatos0-esperado0] PASSED
+tests/app/test_regras.py::test_regra[fatos1-esperado1] PASSED
+tests/app/test_regras.py::test_regra[fatos2-esperado2] PASSED
+tests/app/test_regras.py::test_regra[fatos3-esperado3] PASSED
+tests/app/test_regras.py::test_regra[fatos4-esperado4] PASSED
+tests/app/test_regras.py::test_regra[fatos5-esperado5] PASSED
+tests/app/test_regras.py::test_regra[fatos6-esperado6] PASSED
+tests/app/test_regras.py::test_regra[fatos7-esperado7] PASSED
+tests/app/test_regras.py::test_regra[fatos8-esperado8] PASSED
+tests/app/test_regras.py::test_regra[fatos9-None] PASSED
+tests/app/test_regras.py::test_regra[fatos10-None] PASSED
+tests/app/test_regras.py::test_regra[fatos11-esperado11] PASSED
+tests/app/test_regras.py::test_regra[fatos12-esperado12] PASSED
+tests/app/test_regras.py::test_regra[fatos13-esperado13] PASSED
+tests/app/test_regras.py::test_regra[fatos14-None] PASSED
+tests/app/test_regras.py::test_regra[fatos15-None] PASSED
+tests/app/test_regras.py::test_regra[fatos16-esperado16] PASSED
+tests/app/test_regras.py::test_regra[fatos17-None] PASSED
+tests/app/test_regras.py::test_classe_desconhecida PASSED
+tests/app/test_worker.py::test_fluxo_completo_remove_exif_e_quarentena PASSED
+tests/app/test_worker.py::test_png_e_aceito_e_vira_jpeg PASSED
+tests/app/test_worker.py::test_imagem_invalida_e_recusada_sem_nova_tentativa[jpeg truncado-<lambda>] PASSED
+tests/app/test_worker.py::test_imagem_invalida_e_recusada_sem_nova_tentativa[cabe\xe7alho jpeg + lixo-<lambda>] PASSED
+tests/app/test_worker.py::test_imagem_invalida_e_recusada_sem_nova_tentativa[imagem min\xfascula-<lambda>] PASSED
+tests/app/test_worker.py::test_imagem_invalida_e_recusada_sem_nova_tentativa[bomba de descompress\xe3o-_bomba_png] PASSED
+tests/app/test_worker.py::test_poliglota_jpeg_html_sai_limpo PASSED
+tests/app/test_worker.py::test_tempo_limite_da_decodificacao PASSED
+tests/app/test_worker.py::test_divergencia_gera_alerta_uma_vez PASSED
+tests/app/test_worker.py::test_estoque_velho_vira_inconclusivo PASSED
+tests/app/test_worker.py::test_planograma_com_rejeicao_pendente_vira_inconclusivo PASSED
+tests/app/test_worker.py::test_nenhuma_transacao_aberta_durante_processamento PASSED
+tests/app/test_worker.py::test_queda_no_meio_e_retomada_sem_duplicar PASSED
+tests/app/test_worker.py::test_worker_atrasado_e_descartado PASSED
+tests/app/test_worker.py::test_arquivo_sumiu_da_quarentena PASSED
+tests/db/test_invariantes.py::test_i01_worker_nao_executa_transicao PASSED
+tests/db/test_invariantes.py::test_i01_worker_nao_altera_status_diretamente PASSED
+tests/db/test_invariantes.py::test_i01_worker_nao_insere_alerta_ja_confirmado PASSED
+tests/db/test_invariantes.py::test_i01_confirmacao_exige_gerente_e_causa PASSED
+tests/db/test_invariantes.py::test_i02_divergencia_exige_snapshot PASSED
+tests/db/test_invariantes.py::test_i02_observacao_de_outra_posicao PASSED
+tests/db/test_invariantes.py::test_i02_snapshot_de_outro_produto PASSED
+tests/db/test_invariantes.py::test_i02_produto_diferente_do_planograma PASSED
+tests/db/test_invariantes.py::test_i02_evidencias_imutaveis_mesmo_para_dono PASSED
+tests/db/test_invariantes.py::test_i03_mesmo_arquivo_duas_vezes PASSED
+tests/db/test_invariantes.py::test_i03_produto_repetido_no_mesmo_arquivo PASSED
+tests/db/test_invariantes.py::test_i03_quantidade_absurda PASSED
+tests/db/test_invariantes.py::test_i03_reprocessar_captura_nao_duplica PASSED
+tests/db/test_invariantes.py::test_i03_mesma_foto_duas_vezes PASSED
+tests/db/test_invariantes.py::test_i04_vigencias_sobrepostas PASSED
+tests/db/test_invariantes.py::test_i04_trocar_produto_de_vigencia_existente PASSED
+tests/db/test_invariantes.py::test_i04_mudanca_correta_preserva_historico PASSED
+tests/db/test_invariantes.py::test_i05_versao_desatualizada PASSED
+tests/db/test_invariantes.py::test_i05_decisao_final_nao_reverte PASSED
+tests/db/test_invariantes.py::test_i05_status_nao_muda_fora_da_funcao PASSED
+tests/db/test_invariantes.py::test_i05_duas_sessoes_simultaneas PASSED
+tests/db/test_invariantes.py::test_i05_um_alerta_aberto_por_posicao_e_tipo PASSED
+tests/db/test_invariantes.py::test_i06_app_nao_altera_eventos[observacao_visual] PASSED
+tests/db/test_invariantes.py::test_i06_app_nao_altera_eventos[snapshot_estoque] PASSED
+tests/db/test_invariantes.py::test_i06_app_nao_altera_eventos[importacao] PASSED
+tests/db/test_invariantes.py::test_i06_nem_o_dono_apaga_eventos[observacao_visual] PASSED
+tests/db/test_invariantes.py::test_i06_nem_o_dono_apaga_eventos[snapshot_estoque] PASSED
+tests/db/test_invariantes.py::test_i06_nem_o_dono_apaga_eventos[importacao] PASSED
+tests/db/test_invariantes.py::test_i06_nem_o_dono_apaga_eventos[transicao_alerta] PASSED
+tests/db/test_invariantes.py::test_i06_captura_estado_final_e_origem_imutavel PASSED
+tests/db/test_invariantes.py::test_i07_bi_le_somente_views_reais PASSED
+tests/db/test_invariantes.py::test_i07_bi_nao_escreve PASSED
+tests/db/test_invariantes.py::test_i08_app_nao_expurga PASSED
+tests/db/test_invariantes.py::test_i08_expurgo_remove_tudo_da_loja PASSED
+tests/db/test_invariantes.py::test_i09_nenhuma_funcao_security_definer_publica PASSED
+tests/db/test_v051.py::test_f01_versao_nula_recusada PASSED
+tests/db/test_v051.py::test_f02_observacao_com_vigencia_fora_da_captura PASSED
+tests/db/test_v051.py::test_f02_encerrar_vigencia_antes_de_observacao_existente PASSED
+tests/db/test_v051.py::test_f03_snapshot_velho PASSED
+tests/db/test_v051.py::test_f03_snapshot_do_futuro PASSED
+tests/db/test_v051.py::test_f03_snapshot_superado_por_outro_mais_recente PASSED
+tests/db/test_v051.py::test_f03_snapshot_do_dia_anterior_aceito PASSED
+tests/db/test_v051.py::test_f03_arquivo_tem_uma_unica_data PASSED
+tests/db/test_v051.py::test_f04_sem_objetos_temporarios[stp_app] PASSED
+tests/db/test_v051.py::test_f04_sem_objetos_temporarios[stp_worker] PASSED
+tests/db/test_v051.py::test_f04_sem_objetos_temporarios[stp_bi] PASSED
+tests/db/test_v051.py::test_f04_nenhum_schema_gravavel[stp_app] PASSED
+tests/db/test_v051.py::test_f04_nenhum_schema_gravavel[stp_worker] PASSED
+tests/db/test_v051.py::test_f04_nenhum_schema_gravavel[stp_bi] PASSED
+tests/db/test_v051.py::test_f05_funcao_nova_nasce_fechada PASSED
+tests/db/test_v051.py::test_f06_toda_funcao_fixa_search_path PASSED
+tests/db/test_v051.py::test_f06_search_path_do_chamador_nao_interfere PASSED
+tests/db/test_v051.py::test_f07_loja_revogada PASSED
+tests/db/test_v051.py::test_f08_tentativa_rejeitada_nao_grava_snapshot PASSED
+tests/db/test_v051.py::test_w01_reserva_nao_segura_lock PASSED
+tests/db/test_v051.py::test_w02_workers_concorrentes_pegam_capturas_diferentes PASSED
+tests/db/test_v051.py::test_w03_reserva_vencida_volta_e_worker_atrasado_e_recusado PASSED
+tests/db/test_v051.py::test_w04_conclusao_e_atomica PASSED
+tests/db/test_v051.py::test_w05_item_venenoso_vira_recusado PASSED
+tests/db/test_v051.py::test_w06_recusar_exige_token PASSED
+tests/db/test_v051.py::test_w07_worker_nao_escreve_direto PASSED
+tests/db/test_v051.py::test_w08_worker_nao_grava_em_outra_loja PASSED
+============================= 156 passed in 36.94s =============================
