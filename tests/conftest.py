@@ -217,3 +217,8 @@ def metodo_registrado():
     with psycopg.connect(DSN, autocommit=True) as c:
         c.execute("SET ROLE stp_migrator")
         c.execute("DELETE FROM op.metodo_ocupacao WHERE id = %s AND NOT EXISTS (SELECT 1 FROM op.observacao_visual WHERE metodo_id = %s)", (mid, mid))
+
+
+def arquivos(d):
+    """Só arquivos (as áreas têm os subdiretórios .tmp e .lixeira)."""
+    return [p for p in d.iterdir() if p.is_file()]

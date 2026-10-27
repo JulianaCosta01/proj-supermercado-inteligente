@@ -22,13 +22,25 @@ class Config:
     @property
     def imagens(self): return self.dir_dados / "imagens"
     @property
-    def tmp(self): return self.dir_dados / "tmp"
-    @property
-    def lixeira(self): return self.dir_dados / "lixeira"
-    @property
     def referencias(self): return self.dir_dados / "referencias"
+    # Temporários e lixeira ficam DENTRO de cada área: renomear para o destino nunca cruza
+    # volumes (cada área pode ser um volume separado, montado só onde é necessário).
+    @property
+    def tmp_quarentena(self): return self.quarentena / ".tmp"
+    @property
+    def tmp_imagens(self): return self.imagens / ".tmp"
+    @property
+    def tmp_referencias(self): return self.referencias / ".tmp"
+
+    @staticmethod
+    def lixeira_de(area): return area / ".lixeira"
 
     def preparar_diretorios(self):
-        for d in (self.quarentena, self.imagens, self.tmp, self.lixeira, self.referencias):
-            d.mkdir(parents=True, exist_ok=True)
-            os.chmod(d, 0o700)
+        """Cria o que for possível; num contêiner, áreas montadas só para leitura são puladas."""
+        for area in (self.quarentena, self.imagens, self.referencias):
+            for d in (area, area / ".tmp", area / ".lixeira"):
+                try:
+                    d.mkdir(parents=True, exist_ok=True)
+                    os.chmod(d, 0o700)
+                except OSError:
+                    pass

@@ -76,7 +76,7 @@ class Worker:
             self._recusar(captura_id, token, "arquivo_ausente", None)
             return "recusada"
 
-        saida_tmp = self.cfg.tmp / f"{uuid.uuid4()}.jpg"
+        saida_tmp = self.cfg.tmp_imagens / f"{uuid.uuid4()}.jpg"
         status, info = recodificar_isolado(quarentena, saida_tmp)
         if status == "invalida":
             saida_tmp.unlink(missing_ok=True)

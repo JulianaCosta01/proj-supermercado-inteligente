@@ -4,7 +4,7 @@ Regras de segurança (testadas em tests/app/test_reconciliacao.py):
   1. lista os arquivos ANTES de consultar o banco; arquivo novo nunca é candidato (idade mínima)
   2. aborta se o banco falhar, ou se o banco não tiver capturas enquanto existem arquivos
   3. trava: aborta se os candidatos passarem de 5% dos arquivos (e de 10) ou de 200
-  4. nada é apagado direto: candidatos vão para lixeira/AAAAMMDD/ e só saem após 7 dias
+  4. nada é apagado direto: candidatos vão para <área>/.lixeira/AAAAMMDD/ e só saem após 7 dias
   5. arquivo de quarentena de captura finalizada é apagado (o dado bruto não deve ficar)
   6. captura processada sem arquivo é registrada em op.imagem_ausente (não apaga nada no banco)
 """
@@ -42,8 +42,8 @@ def _arquivos(cfg):
     return q, im
 
 
-def _para_lixeira(cfg, origem, rel):
-    destino = cfg.lixeira / dt.date.today().strftime("%Y%m%d") / rel.replace("/", "_")
+def _para_lixeira(cfg, area, origem, rel):
+    destino = cfg.lixeira_de(area) / dt.date.today().strftime("%Y%m%d") / rel.replace("/", "_")
     destino.parent.mkdir(parents=True, exist_ok=True)
     os.replace(origem, destino)
 
@@ -51,9 +51,12 @@ def _para_lixeira(cfg, origem, rel):
 def reconciliar(cfg, dsn_worker: str, agora_fn=time.time) -> Resultado:
     res = Resultado()
     # tmp/: restos de uploads ou recodificações interrompidos
-    for p in cfg.tmp.iterdir():
-        if p.is_file() and agora_fn() - p.stat().st_mtime > IDADE_TMP_S:
-            p.unlink(missing_ok=True); res.tmp_apagados += 1
+    for tmpdir in (cfg.tmp_quarentena, cfg.tmp_imagens):
+        if not tmpdir.is_dir():
+            continue
+        for p in tmpdir.iterdir():
+            if p.is_file() and agora_fn() - p.stat().st_mtime > IDADE_TMP_S:
+                p.unlink(missing_ok=True); res.tmp_apagados += 1
 
     q_arqs, im_arqs = _arquivos(cfg)                       # (1) arquivos primeiro
     total = len(q_arqs) + len(im_arqs)
@@ -85,9 +88,9 @@ def reconciliar(cfg, dsn_worker: str, agora_fn=time.time) -> Resultado:
         return res
 
     for n in orfaos_q:                                                          # (4)
-        _para_lixeira(cfg, cfg.quarentena / n, f"quarentena/{n}"); res.movidos_lixeira.append(f"quarentena/{n}")
+        _para_lixeira(cfg, cfg.quarentena, cfg.quarentena / n, f"quarentena/{n}"); res.movidos_lixeira.append(f"quarentena/{n}")
     for r in orfaos_im:
-        _para_lixeira(cfg, cfg.imagens / r, f"imagens/{r}"); res.movidos_lixeira.append(f"imagens/{r}")
+        _para_lixeira(cfg, cfg.imagens, cfg.imagens / r, f"imagens/{r}"); res.movidos_lixeira.append(f"imagens/{r}")
     for n in finalizados_q:                                                     # (5)
         (cfg.quarentena / n).unlink(missing_ok=True); res.quarentena_apagada.append(n)
 
@@ -99,11 +102,14 @@ def reconciliar(cfg, dsn_worker: str, agora_fn=time.time) -> Resultado:
         res.imagens_ausentes = ausentes
 
     limite = dt.date.today() - dt.timedelta(days=DIAS_LIXEIRA)
-    for d in cfg.lixeira.iterdir():
-        try:
-            dia = dt.datetime.strptime(d.name, "%Y%m%d").date()
-        except ValueError:
+    for lixeira in (cfg.lixeira_de(cfg.quarentena), cfg.lixeira_de(cfg.imagens)):
+        if not lixeira.is_dir():
             continue
-        if dia < limite:
-            shutil.rmtree(d); res.lixeira_esvaziada += 1
+        for d in lixeira.iterdir():
+            try:
+                dia = dt.datetime.strptime(d.name, "%Y%m%d").date()
+            except ValueError:
+                continue
+            if dia < limite:
+                shutil.rmtree(d); res.lixeira_esvaziada += 1
     return res

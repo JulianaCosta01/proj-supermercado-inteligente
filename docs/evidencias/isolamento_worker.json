@@ -1,0 +1,16 @@
+{
+  "internet_tcp": "bloqueado:OSError",
+  "dns": "bloqueado:gaierror",
+  "escrever_raiz": "bloqueado:OSError",
+  "escrever_codigo": "bloqueado:OSError",
+  "escrever_referencias": "bloqueado:OSError",
+  "escrever_imagens_tmp": "permitido",
+  "banco_superusuario": "bloqueado:OperationalError",
+  "banco_worker_sem_senha": "bloqueado:OperationalError",
+  "banco_worker_com_senha": "permitido",
+  "banco_migrador": "bloqueado:OperationalError",
+  "raiz_somente_leitura": true,
+  "uid": 10001,
+  "CapEff": "0000000000000000",
+  "NoNewPrivs": "1"
+}

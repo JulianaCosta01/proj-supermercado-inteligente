@@ -5,7 +5,7 @@ import time
 import psycopg
 import pytest
 from PIL import Image
-from conftest import DSN, entrar, jpeg, png, agora_iso, um
+from conftest import arquivos, DSN, entrar, jpeg, png, agora_iso, um
 from app.worker import Worker, recodificar_isolado
 
 
@@ -67,7 +67,7 @@ def test_fluxo_completo_remove_exif_e_quarentena(cliente, amb, cfg, w):
     import hashlib
     assert hashlib.sha256(arquivo.read_bytes()).hexdigest() == sha
     assert len(Image.open(arquivo).getexif()) == 0                      # nenhum metadado na saída
-    assert list(cfg.quarentena.iterdir()) == [] and list(cfg.tmp.iterdir()) == []
+    assert arquivos(cfg.quarentena) == [] and arquivos(cfg.tmp_quarentena) + arquivos(cfg.tmp_imagens) == []
     with psycopg.connect(DSN) as c:
         assert um(c, "SELECT count(*) FROM op.observacao_visual WHERE captura_id = %s", cid) == 3
 
@@ -98,7 +98,7 @@ def test_imagem_invalida_e_recusada_sem_nova_tentativa(cliente, amb, cfg, w, nom
     assert w().processar_um() == "recusada", nome
     est, motivo, chave, _, tent = estado(cid)
     assert est == "recusada" and motivo.startswith("imagem_invalida") and chave is None and tent == 1
-    assert list(cfg.quarentena.iterdir()) == []
+    assert arquivos(cfg.quarentena) == []
     assert time.time() - inicio < 30
 
 
@@ -186,7 +186,7 @@ def test_queda_no_meio_e_retomada_sem_duplicar(cliente, amb, cfg, w):
     assert est == "processada" and tent == 2
     with psycopg.connect(DSN) as c:
         assert um(c, "SELECT count(*) FROM op.observacao_visual WHERE captura_id = %s", cid) == 3
-    assert list(cfg.quarentena.iterdir()) == []
+    assert arquivos(cfg.quarentena) == []
 
 
 def test_worker_atrasado_e_descartado(cliente, amb, cfg, w):
@@ -206,7 +206,7 @@ def test_worker_atrasado_e_descartado(cliente, amb, cfg, w):
 def test_arquivo_sumiu_da_quarentena(cliente, amb, cfg, w):
     entrar(cliente, amb, "repositor")
     cid = enviar(cliente, jpeg())
-    for f in cfg.quarentena.iterdir():
+    for f in arquivos(cfg.quarentena):
         f.unlink()
     assert w().processar_um() == "recusada"
     assert estado(cid)[1] == "arquivo_ausente"

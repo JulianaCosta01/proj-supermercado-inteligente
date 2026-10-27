@@ -1,0 +1,4 @@
+Executado em 27/10/2026 (PostgreSQL 16.15, Python 3.13.18, OpenCV 5.0.0, Pillow 13.0.0)
+tests/isolamento/test_isolamento.py::test_controles_de_isolamento PASSED
+tests/isolamento/test_isolamento.py::test_worker_processa_dentro_do_conteiner PASSED
+============================== 2 passed in 7.55s ===============================

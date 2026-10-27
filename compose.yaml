@@ -1,0 +1,79 @@
+# Implantação do piloto: uma VM, um banco, API e worker.
+# Segredos em arquivos fora do repositório (./segredos/*.txt, permissão 600).
+name: shelf-to-profit
+
+x-endurecido: &endurecido
+  read_only: true
+  user: "10001:10001"
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  tmpfs: ["/tmp:size=64m,mode=1777"]
+  restart: unless-stopped
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: stp
+      POSTGRES_PASSWORD_FILE: /run/secrets/pg_superusuario
+    secrets: [pg_superusuario]
+    command: ["postgres", "-c", "hba_file=/etc/postgresql/pg_hba.conf", "-c", "listen_addresses="]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - pg_socket:/var/run/postgresql        # API e worker falam com o banco só por socket Unix
+      - ./db/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+    network_mode: none                        # o banco não escuta TCP
+    restart: unless-stopped
+
+  api:
+    <<: *endurecido
+    build: .
+    environment:
+      STP_DSN_APP: "host=/var/run/postgresql dbname=stp user=stp_app_u"
+      PGPASSFILE: /run/secrets/pgpass_app
+      STP_DIR_DADOS: /dados
+      STP_ORIGEM: "https://${STP_DOMINIO:?defina STP_DOMINIO}"
+    volumes:
+      - pg_socket:/var/run/postgresql
+      - quarentena:/dados/quarentena          # grava uploads
+      - imagens:/dados/imagens:ro             # só serve imagens processadas
+    secrets: [pgpass_app]
+    networks: [borda]                          # banco só pelo socket
+    ports: ["127.0.0.1:8000:8000"]             # exposto apenas ao nginx da própria VM
+    mem_limit: 512m
+
+  worker:
+    <<: *endurecido
+    build: .
+    command: ["python", "-m", "app.worker_cli"]
+    network_mode: none                         # sem rede alguma: nem internet nem outros contêineres
+    environment:
+      STP_DSN_WORKER: "host=/var/run/postgresql dbname=stp user=stp_worker_u"
+      PGPASSFILE: /run/secrets/pgpass_worker
+      STP_DIR_DADOS: /dados
+    volumes:
+      - pg_socket:/var/run/postgresql
+      - quarentena:/dados/quarentena          # lê e apaga após concluir
+      - imagens:/dados/imagens                # grava a imagem re-codificada
+      - referencias:/dados/referencias:ro     # fotos de referência (gravadas pelo cadastro)
+    secrets: [pgpass_worker]
+    mem_limit: 2g
+    pids_limit: 128
+
+volumes:
+  pgdata:
+  pg_socket:
+  quarentena:
+  imagens:
+  referencias:
+
+networks:
+  borda: {}
+
+secrets:
+  pg_superusuario:
+    file: ./segredos/pg_superusuario.txt
+  pgpass_app:                                  # formato .pgpass; dono uid 10001, permissão 600
+    file: ./segredos/pgpass_app
+  pgpass_worker:
+    file: ./segredos/pgpass_worker

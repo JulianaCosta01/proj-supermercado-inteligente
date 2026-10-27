@@ -3,7 +3,7 @@ import os
 import stat
 import psycopg
 import pytest
-from conftest import DSN, entrar, jpeg, png, agora_iso, um
+from conftest import arquivos, DSN, entrar, jpeg, png, agora_iso, um
 
 DESPROTEGIDAS = {("GET", "/saude"), ("POST", "/sessao"), ("GET", "/openapi.json")}
 
@@ -103,10 +103,10 @@ def test_upload_vai_para_quarentena(cliente, amb, cfg):
     entrar(cliente, amb, "repositor")
     r = cliente.post("/capturas", params={"capturado_em": agora_iso()}, content=jpeg())
     assert r.status_code == 201 and r.json()["estado"] == "recebida"
-    arquivos = list(cfg.quarentena.iterdir())
-    assert len(arquivos) == 1 and "." not in arquivos[0].name            # UUID, sem extensão
-    assert stat.S_IMODE(arquivos[0].stat().st_mode) == 0o600
-    assert list(cfg.imagens.rglob("*")) == [] and list(cfg.tmp.iterdir()) == []
+    na_quarentena = arquivos(cfg.quarentena)
+    assert len(na_quarentena) == 1 and "." not in na_quarentena[0].name            # UUID, sem extensão
+    assert stat.S_IMODE(na_quarentena[0].stat().st_mode) == 0o600
+    assert [p for p in cfg.imagens.rglob("*") if p.is_file()] == [] and arquivos(cfg.tmp_quarentena) + arquivos(cfg.tmp_imagens) == []
 
 
 def test_upload_idempotente(cliente, amb, cfg):
@@ -116,7 +116,7 @@ def test_upload_idempotente(cliente, amb, cfg):
     b = cliente.post("/capturas", params={"capturado_em": agora_iso()}, content=foto)
     assert a.status_code == 201 and b.status_code == 200
     assert b.json()["duplicada"] and a.json()["id"] == b.json()["id"]
-    assert len(list(cfg.quarentena.iterdir())) == 1
+    assert len(arquivos(cfg.quarentena)) == 1
 
 
 @pytest.mark.parametrize("nome,conteudo,esperado", [
@@ -131,14 +131,14 @@ def test_upload_recusa_formato(cliente, amb, cfg, nome, conteudo, esperado):
     entrar(cliente, amb, "repositor")
     r = cliente.post("/capturas", params={"capturado_em": agora_iso()}, content=conteudo)
     assert r.status_code == esperado, nome
-    assert list(cfg.quarentena.iterdir()) == [] and list(cfg.tmp.iterdir()) == []
+    assert arquivos(cfg.quarentena) == [] and arquivos(cfg.tmp_quarentena) + arquivos(cfg.tmp_imagens) == []
 
 
 def test_upload_grande_demais(cliente, amb, cfg):
     entrar(cliente, amb, "repositor")
     grande = b"\xff\xd8\xff" + os.urandom(cfg.max_upload_bytes)
     assert cliente.post("/capturas", params={"capturado_em": agora_iso()}, content=grande).status_code == 413
-    assert list(cfg.quarentena.iterdir()) == [] and list(cfg.tmp.iterdir()) == []
+    assert arquivos(cfg.quarentena) == [] and arquivos(cfg.tmp_quarentena) + arquivos(cfg.tmp_imagens) == []
 
 
 @pytest.mark.parametrize("quando", ["2026-10-20T10:00:00", "2099-01-01T00:00:00+00:00", "2020-01-01T00:00:00+00:00"])
@@ -158,7 +158,7 @@ def test_falha_no_banco_nao_deixa_arquivo(cliente, amb, cfg):
         with psycopg.connect(DSN, autocommit=True) as c:
             c.execute("GRANT INSERT ON op.captura TO stp_app")
     assert r.status_code == 503 and "ref" in r.json()["detail"]
-    assert list(cfg.quarentena.iterdir()) == []
+    assert arquivos(cfg.quarentena) == []
 
 
 def test_disco_sem_reserva(amb, cfg, tmp_path):
@@ -169,4 +169,4 @@ def test_disco_sem_reserva(amb, cfg, tmp_path):
     with TestClient(criar_app(cfg2)) as tc:
         entrar(tc, amb, "repositor")
         assert tc.post("/capturas", params={"capturado_em": agora_iso()}, content=jpeg()).status_code == 507
-    assert list(cfg.quarentena.iterdir()) == []
+    assert arquivos(cfg.quarentena) == []

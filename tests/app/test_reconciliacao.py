@@ -5,7 +5,7 @@ import time
 import uuid
 import psycopg
 import pytest
-from conftest import DSN, DSN_WORKER, entrar, jpeg, agora_iso, um
+from conftest import arquivos, DSN, DSN_WORKER, entrar, jpeg, agora_iso, um
 from app.reconciliacao import reconciliar
 
 
@@ -27,7 +27,7 @@ def test_banco_fora_do_ar_nao_apaga_nada(cfg):
         orfao_imagem(cfg)
     r = reconciliar(cfg, "host=/tmp/inexistente port=1 dbname=x user=x connect_timeout=1")
     assert r.abortada and "banco" in r.abortada
-    assert len(list(cfg.imagens.rglob("*.jpg"))) == 3 and not any(cfg.lixeira.iterdir())
+    assert len(list(cfg.imagens.rglob("*.jpg"))) == 3 and not any(cfg.lixeira_de(cfg.imagens).rglob('*.jpg'))
 
 
 def test_banco_vazio_com_arquivos_aborta(cfg):
@@ -59,7 +59,7 @@ def test_orfao_antigo_vai_para_lixeira_e_novo_fica(cfg, uma_captura):
     r = reconciliar(cfg, DSN_WORKER)
     assert r.abortada is None
     assert not velho.exists() and novo.exists()
-    assert len(r.movidos_lixeira) == 1 and len(list(cfg.lixeira.rglob("*.jpg"))) == 1
+    assert len(r.movidos_lixeira) == 1 and len(list(cfg.lixeira_de(cfg.imagens).rglob("*.jpg"))) == 1
 
 
 def test_quarentena_em_processamento_fica_e_finalizada_sai(cliente, amb, cfg):
@@ -68,7 +68,7 @@ def test_quarentena_em_processamento_fica_e_finalizada_sai(cliente, amb, cfg):
     b = cliente.post("/capturas", params={"capturado_em": agora_iso()}, content=jpeg(cor=(2, 2, 2))).json()["id"]
     with psycopg.connect(DSN) as c:
         qa, qb = (str(um(c, "SELECT quarentena_chave FROM op.captura WHERE id = %s", x)) for x in (a, b))
-    for q in cfg.quarentena.iterdir():
+    for q in arquivos(cfg.quarentena):
         envelhecer(q)
     with psycopg.connect(DSN, autocommit=True) as c:      # simula: A processada, mas o arquivo não foi apagado
         c.execute("SET ROLE stp_migrator")
@@ -95,10 +95,10 @@ def test_imagem_ausente_e_registrada(cfg, uma_captura):
 
 
 def test_lixeira_e_tmp_expiram(cfg, uma_captura):
-    antiga = cfg.lixeira / (dt.date.today() - dt.timedelta(days=8)).strftime("%Y%m%d")
+    antiga = cfg.lixeira_de(cfg.imagens) / (dt.date.today() - dt.timedelta(days=8)).strftime("%Y%m%d")
     antiga.mkdir(); (antiga / "x").write_bytes(b"x")
-    recente = cfg.lixeira / dt.date.today().strftime("%Y%m%d")
+    recente = cfg.lixeira_de(cfg.imagens) / dt.date.today().strftime("%Y%m%d")
     recente.mkdir(exist_ok=True); (recente / "y").write_bytes(b"y")
-    t = cfg.tmp / "resto.part"; t.write_bytes(b"z"); envelhecer(t, 2)
+    t = cfg.tmp_imagens / "resto.part"; t.write_bytes(b"z"); envelhecer(t, 2)
     r = reconciliar(cfg, DSN_WORKER)
     assert not antiga.exists() and recente.exists() and not t.exists() and r.tmp_apagados == 1

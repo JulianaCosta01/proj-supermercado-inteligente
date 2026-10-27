@@ -169,7 +169,7 @@ def criar_app(cfg: Config | None = None) -> FastAPI:
         if shutil.disk_usage(cfg.dir_dados).free < cfg.reserva_disco_bytes:
             raise HTTPException(507, {"erro": "armazenamento insuficiente"})
 
-        tmp = cfg.tmp / f"{uuid.uuid4()}.part"
+        tmp = cfg.tmp_quarentena / f"{uuid.uuid4()}.part"
         h, total, inicio = hashlib.sha256(), 0, b""
         try:
             with open(tmp, "xb") as f:

@@ -59,7 +59,7 @@ def registrar_referencia(conn, cfg: Config, face_id: int, foto_bytes: bytes) -> 
         raise ValueError("foto ilegível")
     png, sha = gerar_referencia(img, face_do_banco(conn, face_id))
     destino = cfg.referencias / f"{sha}.png"
-    tmp = cfg.tmp / f"{sha}.png.part"
+    tmp = cfg.tmp_referencias / f"{sha}.png.part"
     tmp.write_bytes(png)
     os.replace(tmp, destino)
     with conn.transaction():

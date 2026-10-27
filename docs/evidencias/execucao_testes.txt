@@ -1,4 +1,4 @@
-Executado em 27/10/2026 (PostgreSQL 16.15, Python 3.13.18, Pillow 13.0.0)
+Executado em 27/10/2026 (PostgreSQL 16.15, Python 3.13.18, OpenCV 5.0.0, Pillow 13.0.0)
 tests/app/test_api.py::test_login_e_senha_errada PASSED
 tests/app/test_api.py::test_desativar_usuario_derruba_sessao PASSED
 tests/app/test_api.py::test_logout_revoga PASSED
@@ -52,6 +52,24 @@ tests/app/test_importacao.py::test_variacoes_aceitas[f\xf3rmula na descri\xe7\xe
 tests/app/test_importacao.py::test_relatorio_csv_neutraliza_formulas PASSED
 tests/app/test_importacao.py::test_relatorio_de_outra_loja PASSED
 tests/app/test_importacao.py::test_arquivo_grande_demais PASSED
+tests/app/test_planta.py::test_estado_visual[args0-possivel_divergencia] PASSED
+tests/app/test_planta.py::test_estado_visual[args1-possivel_divergencia] PASSED
+tests/app/test_planta.py::test_estado_visual[args2-divergencia_confirmada] PASSED
+tests/app/test_planta.py::test_estado_visual[args3-possivel_divergencia] PASSED
+tests/app/test_planta.py::test_estado_visual[args4-inconclusivo] PASSED
+tests/app/test_planta.py::test_estado_visual[args5-inconclusivo] PASSED
+tests/app/test_planta.py::test_estado_visual[args6-inconclusivo] PASSED
+tests/app/test_planta.py::test_estado_visual[args7-vazio_coerente] PASSED
+tests/app/test_planta.py::test_estado_visual[args8-inconclusivo] PASSED
+tests/app/test_planta.py::test_estado_visual[args9-inconclusivo] PASSED
+tests/app/test_planta.py::test_estado_visual[args10-parcial] PASSED
+tests/app/test_planta.py::test_estado_visual[args11-ok] PASSED
+tests/app/test_planta.py::test_estado_visual[args12-sem_observacao] PASSED
+tests/app/test_planta.py::test_estado_visual[args13-sem_observacao] PASSED
+tests/app/test_planta.py::test_planta_reflete_o_processamento_real PASSED
+tests/app/test_planta.py::test_imagem_da_captura_so_para_a_propria_loja PASSED
+tests/app/test_planta.py::test_interface_tem_csp_sem_inline PASSED
+tests/app/test_planta.py::test_navegador_mostra_estados_e_confirma PASSED
 tests/app/test_reconciliacao.py::test_banco_fora_do_ar_nao_apaga_nada PASSED
 tests/app/test_reconciliacao.py::test_banco_vazio_com_arquivos_aborta PASSED
 tests/app/test_reconciliacao.py::test_trava_contra_exclusao_em_massa PASSED
@@ -93,6 +111,12 @@ tests/app/test_worker.py::test_nenhuma_transacao_aberta_durante_processamento PA
 tests/app/test_worker.py::test_queda_no_meio_e_retomada_sem_duplicar PASSED
 tests/app/test_worker.py::test_worker_atrasado_e_descartado PASSED
 tests/app/test_worker.py::test_arquivo_sumiu_da_quarentena PASSED
+tests/app/test_worker_visao.py::test_foto_boa_gera_observacoes_nas_posicoes_certas_e_alertas PASSED
+tests/app/test_worker_visao.py::test_foto_tremida_registra_situacao_sem_alertas PASSED
+tests/app/test_worker_visao.py::test_foto_sem_marcadores_e_recusada PASSED
+tests/app/test_worker_visao.py::test_banco_recusa_observacao_de_outra_face PASSED
+tests/app/test_worker_visao.py::test_marcador_repetido_entre_faces_e_recusado PASSED
+tests/app/test_worker_visao.py::test_posicao_fora_da_face_e_recusada PASSED
 tests/db/test_invariantes.py::test_i01_worker_nao_executa_transicao PASSED
 tests/db/test_invariantes.py::test_i01_worker_nao_altera_status_diretamente PASSED
 tests/db/test_invariantes.py::test_i01_worker_nao_insere_alerta_ja_confirmado PASSED
@@ -155,4 +179,30 @@ tests/db/test_v051.py::test_w05_item_venenoso_vira_recusado PASSED
 tests/db/test_v051.py::test_w06_recusar_exige_token PASSED
 tests/db/test_v051.py::test_w07_worker_nao_escreve_direto PASSED
 tests/db/test_v051.py::test_w08_worker_nao_grava_em_outra_loja PASSED
-============================= 156 passed in 36.94s =============================
+tests/visao/test_visao.py::test_classifica_posicoes_corretas[frontal-kw0] PASSED
+tests/visao/test_visao.py::test_classifica_posicoes_corretas[perspectiva moderada-kw1] PASSED
+tests/visao/test_visao.py::test_classifica_posicoes_corretas[perspectiva forte-kw2] PASSED
+tests/visao/test_visao.py::test_classifica_posicoes_corretas[sombra lateral-kw3] PASSED
+tests/visao/test_visao.py::test_classifica_posicoes_corretas[mais escuro-kw4] PASSED
+tests/visao/test_visao.py::test_classifica_posicoes_corretas[mais claro-kw5] PASSED
+tests/visao/test_visao.py::test_classifica_posicoes_corretas[tremido leve-kw6] PASSED
+tests/visao/test_visao.py::test_classifica_posicoes_corretas[um marcador oculto-kw7] PASSED
+tests/visao/test_visao.py::test_classifica_posicoes_corretas[compress\xe3o forte-kw8] PASSED
+tests/visao/test_visao.py::test_vazio_tem_confianca_alta_e_parcial_nao PASSED
+tests/visao/test_visao.py::test_resultado_reprodutivel PASSED
+tests/visao/test_visao.py::test_imagem_ruim_vira_inconclusivo[dois marcadores ocultos-kw0-marcadores_insuficientes] PASSED
+tests/visao/test_visao.py::test_imagem_ruim_vira_inconclusivo[face cortada no quadro-kw1-marcadores_insuficientes] PASSED
+tests/visao/test_visao.py::test_imagem_ruim_vira_inconclusivo[muito longe-kw2-resolucao_insuficiente] PASSED
+tests/visao/test_visao.py::test_imagem_ruim_vira_inconclusivo[muito escura-kw3-exposicao_inadequada] PASSED
+tests/visao/test_visao.py::test_imagem_ruim_vira_inconclusivo[estourada-kw4-exposicao_inadequada] PASSED
+tests/visao/test_visao.py::test_imagem_ruim_vira_inconclusivo[tremida-kw5-desfocada] PASSED
+tests/visao/test_visao.py::test_imagem_ruim_vira_inconclusivo[tremida mais-kw6-desfocada] PASSED
+tests/visao/test_visao.py::test_sem_face_identificavel_recusa[sem marcadores (todos ocultos)-kw0] PASSED
+tests/visao/test_visao.py::test_sem_face_identificavel_recusa[tremido extremo-kw1] PASSED
+tests/visao/test_visao.py::test_marcadores_de_outra_face_nao_alinham PASSED
+tests/visao/test_visao.py::test_sem_referencia_e_inconclusivo PASSED
+tests/visao/test_visao.py::test_referencia_adulterada_nao_e_usada PASSED
+tests/visao/test_visao.py::test_referencia_exige_quatro_marcadores PASSED
+tests/visao/test_visao.py::test_fundo_perfurado_nao_gera_vazio_confiante_errado PASSED
+tests/visao/test_visao.py::test_roteiro_de_validacao_real_funciona PASSED
+================= 206 passed, 2 deselected in 71.24s (0:01:11) =================
