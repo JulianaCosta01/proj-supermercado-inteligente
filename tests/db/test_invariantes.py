@@ -1,5 +1,5 @@
 """Cada teste tenta violar uma invariante e verifica que o banco recusa.
-Os nomes I-xx correspondem à tabela de invariantes da especificação."""
+Os nomes I-xx correspondem às invariantes listadas em docs/seguranca.md."""
 import threading
 import psycopg
 import pytest

@@ -12,10 +12,11 @@ e mostra o resultado numa planta 2D. Uma pessoa confirma; o sistema nunca chama 
     tests/          db/ (invariantes), app/ (API, worker, planta), visao/ (imagens sintéticas),
                     isolamento/ (worker em contêiner), sintetico.py (gerador de fotos sintéticas)
     scripts/        mutações, verificação de publicação, avaliação sintética, validação com fotos reais, marcadores
-    docs/           evidências dos testes (docs/evidencias/)
+    docs/           arquitetura.md, seguranca.md e evidências dos testes (docs/evidencias/)
     Dockerfile, compose.yaml
 
-Padrão de comentários e commits: [CONTRIBUTING.md](CONTRIBUTING.md).
+Arquitetura: [docs/arquitetura.md](docs/arquitetura.md). Segurança: [docs/seguranca.md](docs/seguranca.md).
+Padrão de comentários, commits e publicação: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Como a visão funciona (método B1-referencia 1.0.0)
 
@@ -74,7 +75,7 @@ Sugestão mínima: 30 fotos em 3 horários, com 20% das posições vazias, anota
     python scripts/avaliar_sintetico.py 60
     STP_EVIDENCIAS=docs/evidencias python -m pytest -q tests/app/test_planta.py   # regrava as capturas de tela
 
-## Implantação do piloto (resumo)
+## Implantação (resumo)
 
 - `compose.yaml`: banco sem TCP; API e worker falam com ele **só por socket Unix**, com senha (scram), conforme `db/pg_hba.conf`.
   Sem esse pg_hba, o padrão da imagem oficial (trust no socket) deixaria qualquer contêiner com o socket entrar como superusuário.
