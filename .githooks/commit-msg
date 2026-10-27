@@ -1,0 +1,28 @@
+#!/usr/bin/env python3
+"""Recusa mensagens fora do padrão do projeto (ver CONTRIBUTING.md)."""
+import re
+import sys
+
+TIPOS = "feat|fix|test|refactor|security|build|ci|docs|style|chore|perf|revert"
+VAGAS = {"update", "updates", "fix", "fixes", "change", "changes", "final version", "improvements", "wip", "ajustes"}
+
+linhas = [l for l in open(sys.argv[1], encoding="utf-8").read().splitlines() if not l.startswith("#")]
+titulo = linhas[0].strip() if linhas else ""
+corpo = "\n".join(linhas).lower()
+erros = []
+m = re.match(rf"^({TIPOS})(\([a-z0-9-]+\))?!?: (.+)$", titulo)
+if titulo.startswith(("Merge ", "Revert ")):
+    sys.exit(0)
+if not m:
+    erros.append(f"o título deve seguir 'tipo: descrição' com tipo em {TIPOS.replace('|', ', ')}")
+elif m.group(3).strip().lower().rstrip(".") in VAGAS or len(m.group(3)) < 10:
+    erros.append("descrição vaga ou curta demais")
+if len(titulo) > 72:
+    erros.append("título com mais de 72 caracteres")
+if re.search(r"[\U0001F300-\U0001FAFF☀-➿]", "\n".join(linhas)):
+    erros.append("sem emojis")
+if re.search(r"co-authored-by: claude|generated with|gerado (por|com) (ia|claude)", corpo):
+    erros.append("sem referências a conteúdo gerado por IA")
+if erros:
+    sys.stderr.write("commit recusado:\n  - " + "\n  - ".join(erros) + "\n")
+    sys.exit(1)
