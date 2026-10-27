@@ -15,6 +15,8 @@ e mostra o resultado numa planta 2D. Uma pessoa confirma; o sistema nunca chama 
     docs/           evidências dos testes (docs/evidencias/)
     Dockerfile, compose.yaml
 
+Padrão de comentários e commits: [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Como a visão funciona (método B1-referencia 1.0.0)
 
 1. Cada face de gôndola tem 4 marcadores ArUco impressos (ids únicos na loja) e a geometria das posições em mm.
