@@ -50,7 +50,7 @@ def _para_lixeira(cfg, area, origem, rel):
 
 def reconciliar(cfg, dsn_worker: str, agora_fn=time.time) -> Resultado:
     res = Resultado()
-    # tmp/: restos de uploads ou recodificações interrompidos
+    # Restos de uploads ou recodificações interrompidos.
     for tmpdir in (cfg.tmp_quarentena, cfg.tmp_imagens):
         if not tmpdir.is_dir():
             continue

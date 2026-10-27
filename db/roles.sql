@@ -7,6 +7,6 @@ CREATE ROLE stp_bi       NOLOGIN;   -- leitura analítica (exportação para o P
 ALTER ROLE stp_bi SET default_transaction_read_only = on;
 CREATE EXTENSION IF NOT EXISTS btree_gist;
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;
--- v0.5.1: sem objetos temporários para ninguém além do dono (evita sombreamento de nomes).
+-- Sem objetos temporários para ninguém além do dono (evita sombreamento de nomes).
 REVOKE TEMPORARY ON DATABASE {db} FROM PUBLIC;
 GRANT CREATE ON DATABASE {db} TO stp_migrator;

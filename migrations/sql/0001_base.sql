@@ -1,11 +1,10 @@
--- Shelf-to-Profit: núcleo do schema operacional com invariantes no banco.
--- Versão 0.5.1. Executar como stp_migrator (SET ROLE stp_migrator) depois de roles.sql.
--- Protótipo para validar mecanismos; não é o schema completo.
+-- Schema operacional com as invariantes garantidas pelo próprio banco.
+-- Executado como stp_migrator, depois de db/roles.sql.
 --
--- Regras de escrita deste arquivo (v0.5.1):
---  * toda função tem SET search_path = pg_catalog, pg_temp e qualifica objetos com op./an.
---  * funções novas nascem sem EXECUTE para PUBLIC (privilégio padrão abaixo)
---  * verificações de igualdade usam IS DISTINCT FROM (NULL nunca passa por uma checagem)
+-- Regras para as funções deste schema (verificadas por tests/db/test_v051.py):
+-- toda função fixa search_path = pg_catalog, pg_temp e qualifica objetos com op. ou an.;
+-- funções nascem sem EXECUTE para PUBLIC; comparações usam IS DISTINCT FROM para que NULL
+-- nunca desligue uma checagem.
 
 ALTER DEFAULT PRIVILEGES REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
 
@@ -13,7 +12,6 @@ CREATE SCHEMA op;
 CREATE SCHEMA an;
 REVOKE ALL ON SCHEMA op, an FROM PUBLIC;
 
--- ---------------------------------------------------------------- cadastro
 CREATE TABLE op.loja (
   id                       bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   nome                     text NOT NULL CHECK (length(nome) BETWEEN 1 AND 200),
@@ -21,7 +19,7 @@ CREATE TABLE op.loja (
   fuso                     text NOT NULL DEFAULT 'America/Fortaleza',
   -- idade máxima (em dias) do snapshot de estoque aceito como base de uma divergência
   max_idade_snapshot_dias  integer NOT NULL DEFAULT 1 CHECK (max_idade_snapshot_dias BETWEEN 0 AND 7),
-  -- v0.5.1: revogação da autorização bloqueia novas entradas e some das views analíticas
+  -- Revogação da autorização bloqueia novas entradas e some das views analíticas
   autorizacao_revogada_em  timestamptz
 );
 
@@ -56,8 +54,7 @@ CREATE TABLE op.planograma_vigencia (
   EXCLUDE USING gist (posicao_id WITH =, vigencia WITH &&)
 );
 
--- ---------------------------------------------------------------- capturas
--- v0.5.1: o arquivo enviado fica em quarentena (nome = UUID, sem extensão, nunca servido).
+-- O arquivo enviado fica em quarentena (nome = UUID, sem extensão, nunca servido).
 -- O worker decodifica, re-codifica e grava a imagem processada; só ela tem chave .jpg.
 CREATE TABLE op.captura (
   id                  bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -108,8 +105,7 @@ CREATE TABLE op.observacao_visual (
   UNIQUE (id, posicao_id)
 );
 
--- ---------------------------------------------------------------- dados do sistema de gestão
--- v0.5.1: só importações aceitas entram aqui. Arquivo com erro não grava nenhum snapshot;
+-- Só importações aceitas entram aqui. Arquivo com erro não grava nenhum snapshot;
 -- a tentativa e o relatório ficam em op.importacao_tentativa.
 CREATE TABLE op.importacao (
   id               bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -147,7 +143,6 @@ CREATE TABLE op.snapshot_estoque (
   UNIQUE (id, produto_id)
 );
 
--- ---------------------------------------------------------------- alertas
 CREATE TABLE op.alerta (
   id             bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   loja_id        bigint NOT NULL REFERENCES op.loja ON DELETE CASCADE,
@@ -184,7 +179,6 @@ CREATE TABLE op.transicao_alerta (
   CHECK (para_status <> 'rejeitado' OR motivo IS NOT NULL)
 );
 
--- ---------------------------------------------------------------- gatilhos de integridade
 CREATE FUNCTION op.somente_insercao() RETURNS trigger
 LANGUAGE plpgsql SET search_path = pg_catalog, pg_temp AS $$
 BEGIN
@@ -200,7 +194,7 @@ CREATE TRIGGER t_ro BEFORE UPDATE OR DELETE ON op.transicao_alerta    FOR EACH R
 CREATE TRIGGER t_ro BEFORE UPDATE OR DELETE ON op.importacao          FOR EACH ROW EXECUTE FUNCTION op.somente_insercao();
 CREATE TRIGGER t_ro BEFORE UPDATE OR DELETE ON op.importacao_tentativa FOR EACH ROW EXECUTE FUNCTION op.somente_insercao();
 
--- v0.5.1: loja com autorização revogada não recebe novas capturas nem importações.
+-- Loja com autorização revogada não recebe novas capturas nem importações.
 CREATE FUNCTION op.loja_autorizada() RETURNS trigger
 LANGUAGE plpgsql SET search_path = pg_catalog, pg_temp AS $$
 BEGIN
@@ -224,7 +218,7 @@ BEGIN
      OR NOT upper_inf(OLD.vigencia) OR upper_inf(NEW.vigencia) THEN
     RAISE EXCEPTION 'planograma: só é permitido encerrar uma vigência aberta' USING ERRCODE = 'STP01';
   END IF;
-  -- v0.5.1: encerrar a vigência não pode deixar observações já feitas fora dela
+  -- Encerrar a vigência não pode deixar observações já feitas fora dela
   IF EXISTS (SELECT 1 FROM op.observacao_visual o JOIN op.captura c ON c.id = o.captura_id
               WHERE o.planograma_id = NEW.id AND NOT (NEW.vigencia @> c.capturado_em)) THEN
     RAISE EXCEPTION 'planograma: há observações após o novo fim da vigência' USING ERRCODE = 'STP01';
@@ -234,7 +228,7 @@ END $$;
 CREATE TRIGGER t_guarda BEFORE UPDATE OR DELETE ON op.planograma_vigencia
   FOR EACH ROW EXECUTE FUNCTION op.planograma_guarda();
 
--- v0.5.1: a observação só pode apontar para a vigência válida no instante da captura.
+-- A observação só pode apontar para a vigência válida no instante da captura.
 CREATE FUNCTION op.observacao_guarda() RETURNS trigger
 LANGUAGE plpgsql SET search_path = pg_catalog, pg_temp AS $$
 BEGIN
@@ -301,7 +295,7 @@ BEGIN
     IF NEW.status IS DISTINCT FROM 'aberto' OR NEW.versao IS DISTINCT FROM 1 THEN
       RAISE EXCEPTION 'alerta deve nascer aberto' USING ERRCODE = 'STP02';
     END IF;
-    -- v0.5.1: divergência só com snapshot fresco e sem snapshot mais novo disponível
+    -- Divergência só com snapshot fresco e sem snapshot mais novo disponível
     IF NEW.tipo IN ('D1', 'D2') THEN
       SELECT s.data_referencia, i.importado_em INTO v_snap_data, v_snap_imp
         FROM op.snapshot_estoque s JOIN op.importacao i ON i.id = s.importacao_id
@@ -336,7 +330,6 @@ END $$;
 CREATE TRIGGER t_guarda BEFORE INSERT OR UPDATE OR DELETE ON op.alerta
   FOR EACH ROW EXECUTE FUNCTION op.alerta_guarda();
 
--- ---------------------------------------------------------------- transição de alerta
 CREATE FUNCTION op.registrar_transicao(
   p_alerta bigint, p_versao_esperada integer, p_para text, p_usuario bigint,
   p_causa text DEFAULT NULL, p_motivo text DEFAULT NULL, p_comentario text DEFAULT NULL)
@@ -344,7 +337,7 @@ RETURNS integer
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 DECLARE a op.alerta; u op.usuario; nova_versao integer;
 BEGIN
-  -- v0.5.1: parâmetros obrigatórios; NULL não pode desligar nenhuma checagem
+  -- Parâmetros obrigatórios; NULL não pode desligar nenhuma checagem
   IF p_alerta IS NULL OR p_versao_esperada IS NULL OR p_para IS NULL OR p_usuario IS NULL THEN
     RAISE EXCEPTION 'parâmetros obrigatórios ausentes' USING ERRCODE = 'STP08';
   END IF;
@@ -379,7 +372,6 @@ BEGIN
   RETURN nova_versao;
 END $$;
 
--- ---------------------------------------------------------------- fila do worker (v0.5.1)
 -- Reserva curta: a transação só marca a captura e devolve um token. O processamento
 -- pesado acontece fora de qualquer transação. Reserva vencida volta para a fila.
 CREATE FUNCTION op.reivindicar_captura(p_worker text, p_lease interval)
@@ -471,7 +463,6 @@ BEGIN
   END IF;
 END $$;
 
--- ---------------------------------------------------------------- expurgo de loja
 CREATE PROCEDURE op.excluir_loja(p_loja bigint)
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 BEGIN
@@ -480,7 +471,6 @@ BEGIN
   PERFORM pg_catalog.set_config('stp.expurgo', 'off', true);
 END $$;
 
--- ---------------------------------------------------------------- analytics (lojas reais e autorizadas)
 CREATE VIEW an.fato_alerta AS
 SELECT a.id AS alerta_id, a.loja_id, a.tipo, a.status, a.criado_em,
        (SELECT min(t.em) FROM op.transicao_alerta t WHERE t.alerta_id = a.id) - a.criado_em AS tempo_ate_verificacao,
@@ -494,13 +484,12 @@ SELECT l.id AS loja_id,
        (SELECT max(i.importado_em) FROM op.importacao i WHERE i.loja_id = l.id) AS ultima_importacao
   FROM op.loja l WHERE l.origem_dado = 'real' AND l.autorizacao_revogada_em IS NULL;
 
--- ---------------------------------------------------------------- privilégios mínimos
 GRANT USAGE ON SCHEMA op TO stp_app, stp_worker;
 GRANT SELECT ON ALL TABLES IN SCHEMA op TO stp_app;
 GRANT INSERT ON op.captura, op.importacao, op.snapshot_estoque, op.importacao_tentativa TO stp_app;
 GRANT EXECUTE ON FUNCTION op.registrar_transicao(bigint, integer, text, bigint, text, text, text) TO stp_app;
 
--- v0.5.1: o worker não escreve em tabelas diretamente; só pelas três funções da fila.
+-- O worker não escreve em tabelas diretamente; só pelas três funções da fila.
 GRANT SELECT ON op.captura, op.posicao, op.planograma_vigencia, op.metodo_ocupacao,
                 op.snapshot_estoque, op.importacao, op.produto, op.observacao_visual, op.alerta TO stp_worker;
 GRANT EXECUTE ON FUNCTION op.reivindicar_captura(text, interval) TO stp_worker;

@@ -22,7 +22,7 @@ def transicao(conn, alerta, versao, para, usuario, causa=None, motivo=None):
               alerta, versao, para, usuario, causa, motivo)
 
 
-# I-01 Previsão do modelo nunca vira confirmação humana -------------------------------
+# I-01: Previsão do modelo nunca vira confirmação humana
 def test_i01_worker_nao_executa_transicao(conn, cenario):
     como(conn, "stp_worker")
     falha(conn, "SELECT op.registrar_transicao(%s, 1, 'confirmado', %s, 'estoque_fantasma')",
@@ -54,7 +54,7 @@ def test_i01_confirmacao_exige_gerente_e_causa(conn, cenario):
     assert transicao(conn, cenario["alerta"], 1, "confirmado", cenario["gerente"], causa="estoque_fantasma") == 2
 
 
-# I-02 Alerta vinculado à observação e ao snapshot que o originaram --------------------
+# I-02: Alerta vinculado à observação e ao snapshot que o originaram
 def test_i02_divergencia_exige_snapshot(conn, cenario):
     como(conn, "stp_migrator")
     falha(conn, """INSERT INTO op.alerta (loja_id, posicao_id, produto_id, tipo, observacao_id, snapshot_id, versao_regra)
@@ -90,7 +90,7 @@ def test_i02_evidencias_imutaveis_mesmo_para_dono(conn, cenario):
     falha(conn, "UPDATE op.alerta SET snapshot_id = NULL WHERE id = %s", (cenario["alerta"],), sqlstate="STP01")
 
 
-# I-03 Importação idempotente --------------------------------------------------------
+# I-03: Importação idempotente
 def test_i03_mesmo_arquivo_duas_vezes(conn, cenario):
     como(conn, "stp_app")
     falha(conn, "INSERT INTO op.importacao (loja_id, tipo, sha256, data_referencia, linhas_ok, linhas_ignoradas) VALUES (%s, 'estoque', repeat('b', 64), '2026-10-20', 2, 0)",
@@ -121,7 +121,7 @@ def test_i03_mesma_foto_duas_vezes(conn, cenario):
           (cenario["loja"],), exc=errors.UniqueViolation)
 
 
-# I-04 Planograma não reescreve o passado -------------------------------------------
+# I-04: Planograma não reescreve o passado
 def test_i04_vigencias_sobrepostas(conn, cenario):
     como(conn, "stp_migrator")
     falha(conn, "INSERT INTO op.planograma_vigencia (posicao_id, produto_id, vigencia) VALUES (%s, %s, tstzrange('2026-06-01', NULL))",
@@ -144,7 +144,7 @@ def test_i04_mudanca_correta_preserva_historico(conn, cenario):
     assert produto_da_obs == cenario["produto"]
 
 
-# I-05 Concorrência não sobrescreve decisão ----------------------------------------
+# I-05: Concorrência não sobrescreve decisão
 def test_i05_versao_desatualizada(conn, cenario):
     como(conn, "stp_app")
     transicao(conn, cenario["alerta"], 1, "em_verificacao", cenario["repositor"])
@@ -216,7 +216,7 @@ def test_i05_um_alerta_aberto_por_posicao_e_tipo(conn, cenario):
           (cenario["loja"], cenario["posicao"], cenario["produto"], cenario["obs"], cenario["snap"]), exc=errors.UniqueViolation)
 
 
-# I-06 Histórico somente inserção -----------------------------------------------------
+# I-06: Histórico somente inserção
 @pytest.mark.parametrize("tabela", ["observacao_visual", "snapshot_estoque", "importacao"])
 def test_i06_app_nao_altera_eventos(conn, cenario, tabela):
     como(conn, "stp_app")
@@ -242,7 +242,7 @@ def test_i06_captura_estado_final_e_origem_imutavel(conn, cenario):
     falha(conn, "UPDATE op.captura SET sha256_original = repeat('7', 64) WHERE id = %s", (cenario["captura"],), sqlstate="STP01")
 
 
-# I-07 Leitura analítica: só leitura e só dados reais --------------------------------
+# I-07: Leitura analítica: só leitura e só dados reais
 def test_i07_bi_le_somente_views_reais(conn, cenario):
     como(conn, "stp_migrator")
     sint = um(conn, "INSERT INTO op.loja (nome, origem_dado) VALUES ('Demo', 'sintetico') RETURNING id")
@@ -262,7 +262,7 @@ def test_i07_bi_nao_escreve():
             c.execute("INSERT INTO op.loja (nome, origem_dado) VALUES ('x', 'real')")
 
 
-# I-08 Expurgo controlado ------------------------------------------------------------
+# I-08: Expurgo controlado
 def test_i08_app_nao_expurga(conn, cenario):
     como(conn, "stp_app")
     falha(conn, "CALL op.excluir_loja(%s)", (cenario["loja"],), exc=errors.InsufficientPrivilege)
@@ -279,7 +279,7 @@ def test_i08_expurgo_remove_tudo_da_loja(conn, cenario):
     assert um(conn, "SELECT current_setting('stp.expurgo', true)") == "off"
 
 
-# I-09 Funções privilegiadas não ficam abertas a PUBLIC -------------------------------
+# I-09: Funções privilegiadas não ficam abertas a PUBLIC
 def test_i09_nenhuma_funcao_security_definer_publica(conn):
     abertas = conn.execute("""
         SELECT p.oid::regprocedure::text FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace

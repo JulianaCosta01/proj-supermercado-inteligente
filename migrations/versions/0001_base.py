@@ -1,4 +1,4 @@
-"""Schema base v0.5.1 (protótipo validado com 62 testes)."""
+"""Schema base: cadastro, capturas, estoque, alertas e invariantes."""
 import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from sqlfile import executar

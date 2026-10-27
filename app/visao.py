@@ -150,7 +150,7 @@ def combinar(r, f):
     if ocupado_c and ocupado_t:
         return "ocupado", 0.6 + 0.4 * min(1.0, (f - 0.75) / 0.25)
     if ocupado_t and not vazio_c:
-        return "ocupado", 0.5 + 0.2 * f                                    # textura sim, cor diferente: produto trocado?
+        return "ocupado", 0.5 + 0.2 * f                                    # textura sem a mesma cor: pode ser outro produto na posição
     return "parcial", 0.5
 
 

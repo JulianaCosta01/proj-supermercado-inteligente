@@ -1,5 +1,5 @@
-"""Testes da revisão 0.5.1. Cada um reproduz uma falha encontrada (F-xx) ou um mecanismo novo (W-xx).
-Na v0.5 os testes marcados 'falha comprovada' eram aceitos pelo banco."""
+"""F-xx: falhas que o banco aceitava antes da correção (cada teste reproduz uma).
+W-xx: fila do worker com reserva curta."""
 import threading
 import time
 import uuid
@@ -11,7 +11,7 @@ from conftest import DSN, como, um
 from test_invariantes import falha
 
 
-# F-01 (falha comprovada) versão NULL desligava o controle de concorrência ------------------
+# F-01: versão NULL desligava o controle de concorrência
 def test_f01_versao_nula_recusada(conn, cenario):
     como(conn, "stp_app")
     falha(conn, "SELECT op.registrar_transicao(%s, NULL, 'em_verificacao', %s)",
@@ -20,7 +20,7 @@ def test_f01_versao_nula_recusada(conn, cenario):
           (cenario["alerta"], cenario["gerente"]), sqlstate="STP08")
 
 
-# F-02 (falha comprovada) observação apontava para vigência que não valia na captura ---------
+# F-02: observação apontava para vigência que não valia na captura
 def test_f02_observacao_com_vigencia_fora_da_captura(conn, cenario):
     como(conn, "stp_migrator")
     pos = um(conn, "INSERT INTO op.posicao (loja_id, codigo) VALUES (%s, 'X') RETURNING id", cenario["loja"])
@@ -36,7 +36,7 @@ def test_f02_encerrar_vigencia_antes_de_observacao_existente(conn, cenario):
           (cenario["plan"],), sqlstate="STP01")
 
 
-# F-03 (falha comprovada) snapshot velho ou superado gerava divergência -----------------------
+# F-03: snapshot velho ou superado gerava divergência
 def _snapshot(conn, loja, produto, data, sha):
     imp = um(conn, "INSERT INTO op.importacao (loja_id, tipo, sha256, data_referencia, linhas_ok, linhas_ignoradas, importado_em) VALUES (%s, 'estoque', %s, %s, 1, 0, clock_timestamp()) RETURNING id",
              loja, sha, data)
@@ -91,7 +91,7 @@ def test_f03_arquivo_tem_uma_unica_data(conn, cenario):
           (cenario["imp"], p3), exc=errors.ForeignKeyViolation)
 
 
-# F-04 (falha comprovada) papéis da aplicação podiam criar objetos temporários --------------
+# F-04: papéis da aplicação podiam criar objetos temporários
 @pytest.mark.parametrize("papel", ["stp_app", "stp_worker", "stp_bi"])
 def test_f04_sem_objetos_temporarios(conn, papel):
     como(conn, papel)
@@ -105,14 +105,14 @@ def test_f04_nenhum_schema_gravavel(conn, papel):
     assert gravaveis == []
 
 
-# F-05 (falha comprovada) função nova nascia executável por PUBLIC --------------------------
+# F-05: função nova nascia executável por PUBLIC
 def test_f05_funcao_nova_nasce_fechada(conn):
     como(conn, "stp_migrator")
     conn.execute("CREATE FUNCTION op.teste_nova() RETURNS int LANGUAGE sql SET search_path = pg_catalog, pg_temp AS 'select 1'")
     assert um(conn, "SELECT has_function_privilege('public', 'op.teste_nova()', 'EXECUTE')") is False
 
 
-# F-06 (falha comprovada) funções sem search_path fixo --------------------------------------
+# F-06: funções sem search_path fixo
 def test_f06_toda_funcao_fixa_search_path(conn):
     soltas = conn.execute("""
         SELECT p.oid::regprocedure::text FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
@@ -127,7 +127,7 @@ def test_f06_search_path_do_chamador_nao_interfere(conn, cenario):
     assert um(conn, "SELECT op.registrar_transicao(%s, 1, 'em_verificacao', %s)", cenario["alerta"], cenario["repositor"]) == 2
 
 
-# F-07 loja com autorização revogada --------------------------------------------------------
+# F-07: loja com autorização revogada
 def test_f07_loja_revogada(conn, cenario):
     como(conn, "stp_migrator")
     conn.execute("UPDATE op.loja SET autorizacao_revogada_em = now() WHERE id = %s", (cenario["loja"],))
@@ -140,7 +140,7 @@ def test_f07_loja_revogada(conn, cenario):
     assert um(conn, "SELECT count(*) FROM an.fato_alerta WHERE loja_id = %s", cenario["loja"]) == 0
 
 
-# F-08 importação: tentativa rejeitada fica registrada, sem snapshot -------------------------
+# F-08: importação: tentativa rejeitada fica registrada, sem snapshot
 def test_f08_tentativa_rejeitada_nao_grava_snapshot(conn, cenario):
     como(conn, "stp_app")
     conn.execute("""INSERT INTO op.importacao_tentativa (loja_id, tipo, sha256, usuario_id, n_erros, relatorio)
@@ -151,9 +151,7 @@ def test_f08_tentativa_rejeitada_nao_grava_snapshot(conn, cenario):
     falha(conn, "DELETE FROM op.importacao_tentativa", exc=errors.InsufficientPrivilege)
 
 
-# ------------------------------------------------------------------------------------------
-# W: fila do worker com reserva curta (dados confirmados, várias conexões)
-# ------------------------------------------------------------------------------------------
+# Os testes W-xx usam dados confirmados e várias conexões, por isso removem a loja ao final.
 @pytest.fixture
 def fila():
     with psycopg.connect(DSN, autocommit=True) as s:

@@ -91,7 +91,6 @@ def criar_app(cfg: Config | None = None) -> FastAPI:
         resp.headers["Cache-Control"] = "no-store"
         return resp
 
-    # ------------------------------------------------------------ sessão
     def usuario_atual(request: Request) -> Usuario:
         token = request.cookies.get(COOKIE)
         if not token or len(token) > 100:
@@ -153,7 +152,6 @@ def criar_app(cfg: Config | None = None) -> FastAPI:
         response.delete_cookie(COOKIE, path="/")
         return {"ok": True}
 
-    # ------------------------------------------------------------ upload de foto
     @app.post("/capturas", status_code=201)
     async def enviar_foto(request: Request, response: Response,
                           capturado_em: dt.datetime = Query(...),
@@ -207,7 +205,7 @@ def criar_app(cfg: Config | None = None) -> FastAPI:
                     response.status_code = 200
                     return {"id": existente[0], "estado": existente[1], "duplicada": True}
         except psycopg.Error as e:
-            destino.unlink(missing_ok=True)           # se falhar, a reconciliação também remove
+            destino.unlink(missing_ok=True)           # se este unlink falhar, a reconciliação remove depois
             raise http_de_banco(e)
         return {"id": r[0], "estado": "recebida", "duplicada": False}
 
@@ -220,7 +218,6 @@ def criar_app(cfg: Config | None = None) -> FastAPI:
             raise HTTPException(404, {"erro": "não encontrado"})
         return {"id": r[0], "estado": r[1], "motivo_recusa": r[2], "capturado_em": r[3].isoformat()}
 
-    # ------------------------------------------------------------ importação de estoque
     @app.post("/importacoes/estoque", status_code=201)
     async def importar_estoque(request: Request, u: Usuario = Depends(exige(*PAPEIS_IMPORTACAO))):
         cl = request.headers.get("content-length")
@@ -252,7 +249,6 @@ def criar_app(cfg: Config | None = None) -> FastAPI:
         return PlainTextResponse(importacao.relatorio_para_csv(r[0]), media_type="text/csv; charset=utf-8",
                                  headers={"Content-Disposition": 'attachment; filename="relatorio.csv"'})
 
-    # ------------------------------------------------------------ alertas
     @app.get("/alertas")
     def listar_alertas(status: Literal["aberto", "em_verificacao", "confirmado", "rejeitado", "resolvido"] | None = None,
                        limite: int = Query(100, ge=1, le=500), u: Usuario = Depends(usuario_atual)):
@@ -273,7 +269,6 @@ def criar_app(cfg: Config | None = None) -> FastAPI:
             raise http_de_banco(e)
         return {"versao": v}
 
-    # ------------------------------------------------------------ planta 2D
     @app.get("/planta")
     def ver_planta(u: Usuario = Depends(usuario_atual)):
         try:

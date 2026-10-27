@@ -1,6 +1,5 @@
--- 0002: autenticação, correspondência de códigos, imagem ausente e correção da conclusão.
+-- Autenticação, correspondência de códigos, imagem ausente e conclusão idempotente.
 
--- ---------------------------------------------------------------- autenticação
 ALTER TABLE op.usuario ADD COLUMN login text UNIQUE CHECK (login ~ '^[a-z0-9._-]{3,40}$');
 
 CREATE TABLE op.credencial (
@@ -29,7 +28,6 @@ END $$;
 CREATE TRIGGER t_desativado AFTER UPDATE OF ativo ON op.usuario
   FOR EACH ROW EXECUTE FUNCTION op.usuario_desativado();
 
--- ---------------------------------------------------------------- códigos do sistema de gestão
 CREATE TABLE op.codigo_externo (
   id         bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   loja_id    bigint NOT NULL REFERENCES op.loja ON DELETE CASCADE,
@@ -38,7 +36,6 @@ CREATE TABLE op.codigo_externo (
   UNIQUE (loja_id, codigo)
 );
 
--- ---------------------------------------------------------------- imagem ausente (reconciliação)
 CREATE TABLE op.imagem_ausente (
   captura_id    bigint PRIMARY KEY REFERENCES op.captura ON DELETE CASCADE,
   detectada_em  timestamptz NOT NULL DEFAULT now()
@@ -56,7 +53,6 @@ BEGIN
   RETURN FOUND;
 END $$;
 
--- ---------------------------------------------------------------- conclusão de captura (correção)
 -- Falha encontrada na implementação do worker: se já existe alerta aberto do mesmo tipo
 -- para a posição, a inserção violava o índice único e a captura inteira falhava
 -- (e, após 3 tentativas, era recusada). Agora o alerta repetido é ignorado.
@@ -109,7 +105,6 @@ BEGIN
    WHERE id = c.id;
 END $$;
 
--- ---------------------------------------------------------------- privilégios
 GRANT SELECT ON op.credencial, op.sessao, op.codigo_externo, op.imagem_ausente TO stp_app;
 GRANT INSERT, DELETE ON op.sessao TO stp_app;
 GRANT SELECT ON op.codigo_externo, op.imagem_ausente, op.loja, op.transicao_alerta TO stp_worker;

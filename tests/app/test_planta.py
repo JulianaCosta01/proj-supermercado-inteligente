@@ -96,7 +96,6 @@ def test_interface_tem_csp_sem_inline(cliente):
     assert "<script>" not in r.text and "style=" not in r.text
 
 
-# ------------------------------------------------------------------ navegador real (Chromium)
 @pytest.fixture
 def servidor(cfg):
     import uvicorn

@@ -105,7 +105,6 @@ def cenario(conn):
     return d
 
 
-# ============================================================================ fixtures da aplicação
 import datetime as _dt
 import io as _io
 import uuid as _uuid

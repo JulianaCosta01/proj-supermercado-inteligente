@@ -1,4 +1,4 @@
--- 0003: geometria das faces de gôndola, marcadores ArUco e resultado do alinhamento.
+-- Geometria das faces de gôndola, marcadores ArUco e resultado do alinhamento.
 
 CREATE TABLE op.face_gondola (
   id                   bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

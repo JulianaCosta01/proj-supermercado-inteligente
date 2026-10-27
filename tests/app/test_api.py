@@ -8,7 +8,6 @@ from conftest import arquivos, DSN, entrar, jpeg, png, agora_iso, um
 DESPROTEGIDAS = {("GET", "/saude"), ("POST", "/sessao"), ("GET", "/openapi.json")}
 
 
-# ------------------------------------------------------------------ sessão e autorização
 def test_login_e_senha_errada(cliente, amb):
     entrar(cliente, amb, "gerente")
     cliente.cookies.clear()
@@ -98,7 +97,6 @@ def test_cabecalhos_de_seguranca(cliente):
     assert h["x-content-type-options"] == "nosniff" and "default-src 'none'" in h["content-security-policy"]
 
 
-# ------------------------------------------------------------------ upload e quarentena
 def test_upload_vai_para_quarentena(cliente, amb, cfg):
     entrar(cliente, amb, "repositor")
     r = cliente.post("/capturas", params={"capturado_em": agora_iso()}, content=jpeg())

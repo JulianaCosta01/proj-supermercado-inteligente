@@ -23,7 +23,6 @@ MUTACOES = [
      "ALTER DEFAULT PRIVILEGES REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;", "", "i01_worker_nao_executa"),
     ("M8 sem restrição de exclusão do planograma", "0001_base.sql",
      "  EXCLUDE USING gist (posicao_id WITH =, vigencia WITH &&)\n", "  CHECK (true)\n", "i04_vigencias"),
-    # ---- aplicação
     ("A1 conclusão sem ON CONFLICT (alerta repetido derruba a captura)", "0002_gate_d.sql",
      "  ON CONFLICT (posicao_id, tipo) WHERE status IN ('aberto', 'em_verificacao') DO NOTHING;", ";", "divergencia_gera_alerta_uma_vez"),
     ("A2 upload sem a verificação final de assinatura", "app/api.py",
@@ -39,7 +38,6 @@ MUTACOES = [
      "    DELETE FROM op.sessao WHERE usuario_id = NEW.id;", "    NULL;", "desativar_usuario"),
     ("A8 worker apaga quarentena antes do commit", "app/worker.py",
      "        try:\n            captura, posicoes = self._contexto(captura_id)", "        quarentena.unlink()\n        try:\n            captura, posicoes = self._contexto(captura_id)", "queda_no_meio"),
-    # ---- visão
     ("V1 sem bloqueio de foto desfocada", "app/visao.py",
      "        if nit < max(NITIDEZ_ABSOLUTA_MIN, NITIDEZ_RELATIVA_MIN * nit_ref):", "        if False:", "imagem_ruim_vira_inconclusivo"),
     ("V2 foto inadequada ainda abre alertas", "app/worker.py",

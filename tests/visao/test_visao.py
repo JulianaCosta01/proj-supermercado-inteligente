@@ -43,7 +43,6 @@ def classes(res):
     return [c for _, c, _ in res]
 
 
-# ---------------------------------------------------------------- funciona
 @pytest.mark.parametrize("nome,kw", [
     ("frontal", dict(perspectiva=0.02, semente=2)),
     ("perspectiva moderada", dict(perspectiva=0.12, semente=3)),
@@ -76,7 +75,6 @@ def test_resultado_reprodutivel(cena):
     assert rodar(perspectiva=0.1, semente=3)[0] == rodar(perspectiva=0.1, semente=3)[0]
 
 
-# ---------------------------------------------------------------- falhas tratadas
 @pytest.mark.parametrize("nome,kw,situacao", [
     ("dois marcadores ocultos", dict(ocultar_marcadores=[1, 2], semente=4), "marcadores_insuficientes"),
     ("face cortada no quadro", dict(deslocamento=(700, 0), semente=4), "marcadores_insuficientes"),

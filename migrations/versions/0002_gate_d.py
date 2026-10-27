@@ -1,4 +1,4 @@
-"""Gate D: autenticação, códigos externos, imagem ausente, conclusão idempotente."""
+"""Autenticação, códigos externos, imagem ausente e conclusão idempotente."""
 import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from sqlfile import executar

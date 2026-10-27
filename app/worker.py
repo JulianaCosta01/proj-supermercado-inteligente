@@ -65,7 +65,6 @@ class Worker:
     def fechar(self):
         self.conn.close()
 
-    # ------------------------------------------------------------------ ciclo
     def processar_um(self, lease: str = LEASE) -> str | None:
         r = self.conn.execute("SELECT * FROM op.reivindicar_captura(%s, %s::interval)", (self.nome, lease)).fetchone()
         if r is None:
@@ -134,7 +133,6 @@ class Worker:
         if quarentena is not None:
             quarentena.unlink(missing_ok=True)
 
-    # ------------------------------------------------------------------ fatos para a regra
     def _contexto(self, captura_id):
         c = self.conn.execute("""SELECT c.id, c.loja_id, c.capturado_em, (c.capturado_em AT TIME ZONE l.fuso)::date, l.max_idade_snapshot_dias
                                    FROM op.captura c JOIN op.loja l ON l.id = c.loja_id WHERE c.id = %s""", (captura_id,)).fetchone()
