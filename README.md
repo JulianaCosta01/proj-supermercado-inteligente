@@ -3,6 +3,16 @@
 Backend do MVP: banco com invariantes, API (sessão, upload, importação, alertas), worker de visão
 com reserva curta, regra de alerta r2 e reconciliação de arquivos.
 
+## Estrutura
+
+    app/            código da API, worker, importação, regras e reconciliação
+    db/             papéis do PostgreSQL (executar uma vez por servidor)
+    migrations/     migrações Alembic (SQL em migrations/sql/)
+    tests/          testes de banco (tests/db) e da aplicação (tests/app)
+    scripts/        verificação por mutação
+    docs/           evidências dos testes
+    .github/        pipeline de CI
+
 ## Rodar os testes
 
     pip install -r requirements-dev.txt
@@ -29,7 +39,7 @@ Use apenas um PostgreSQL de teste: a suíte apaga e recria o banco `stp` e os pa
 | Planta 2D (front-end) | **não** | não | não |
 | Contêineres (worker sem rede, FS somente leitura) | **não** | não | não |
 
-Total local: **156 testes aprovados** (PostgreSQL 16.15, Python 3.13) e 16 mutações detectadas; ver `evidencias/`.
+Total local: **156 testes aprovados** (PostgreSQL 16.15, Python 3.13) e 16 mutações detectadas; ver `docs/evidencias/`.
 Também executado por TCP com senha, como no CI. O workflow está em `.github/workflows/ci.yml` (actions fixadas por SHA).
 
 ## Decisões registradas nesta entrega
