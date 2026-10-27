@@ -68,6 +68,7 @@ Sugestão mínima: 30 fotos em 3 horários, com 20% das posições vazias, anota
     python scripts/mutacoes.py                                  # cada proteção removida precisa ser detectada
     sudo -E python -m pytest -q tests/isolamento -m isolamento  # precisa de Docker
     python scripts/avaliar_sintetico.py 60
+    STP_EVIDENCIAS=docs/evidencias python -m pytest -q tests/app/test_planta.py   # regrava as capturas de tela
 
 ## Implantação do piloto (resumo)
 

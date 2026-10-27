@@ -1,5 +1,6 @@
 """Planta 2D: estados derivados no servidor, integração com o processamento real (B1) e interface no navegador."""
 import datetime as dt
+import os
 import pathlib
 import threading
 import time
@@ -133,11 +134,14 @@ def test_navegador_mostra_estados_e_confirma(servidor, cliente, amb, cfg, face_c
         assert pag.is_visible("#aviso-sintetico")
         pag.locator(".posicao").nth(1).click()
         assert "Possível divergência" in pag.inner_text("#painel")
-        pasta = pathlib.Path(__file__).resolve().parents[2] / "docs" / "evidencias"
-        pag.screenshot(path=str(pasta / "planta_possivel_divergencia.png"), full_page=True)
+        # Capturas de tela só quando pedidas, para a suíte não alterar arquivos versionados.
+        pasta = pathlib.Path(os.environ["STP_EVIDENCIAS"]) if os.environ.get("STP_EVIDENCIAS") else None
+        if pasta:
+            pag.screenshot(path=str(pasta / "planta_possivel_divergencia.png"), full_page=True)
         pag.select_option("select[name=causa]", "reposicao_pendente")
         pag.click("button[data-acao=confirmado]")
         pag.locator("#painel").get_by_text("Divergência confirmada").first.wait_for()   # (a CSP bloqueia eval, por isso sem wait_for_function)
-        pag.screenshot(path=str(pasta / "planta_confirmada.png"), full_page=True)
+        if pasta:
+            pag.screenshot(path=str(pasta / "planta_confirmada.png"), full_page=True)
         nav.close()
     assert erros_csp == []

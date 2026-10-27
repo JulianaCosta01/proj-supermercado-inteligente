@@ -164,7 +164,8 @@ def test_controles_de_isolamento(cenario):
     r = _docker(cenario, SONDA)
     assert r.returncode == 0, r.stderr[-2000:]
     res = json.loads(r.stdout.strip().splitlines()[-1])
-    (RAIZ / "docs" / "evidencias" / "isolamento_worker.json").write_text(json.dumps(res, indent=2, ensure_ascii=False) + "\n")
+    if os.environ.get("STP_EVIDENCIAS"):
+        pathlib.Path(os.environ["STP_EVIDENCIAS"], "isolamento_worker.json").write_text(json.dumps(res, indent=2, ensure_ascii=False) + "\n")
     for chave in ("internet_tcp", "dns", "escrever_raiz", "escrever_codigo", "escrever_referencias",
                   "banco_superusuario", "banco_worker_sem_senha", "banco_migrador"):
         assert res[chave].startswith("bloqueado"), (chave, res[chave])
