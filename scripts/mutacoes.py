@@ -45,6 +45,12 @@ MUTACOES = [
     ("V3 marcador repetido entre faces aceito", "0003_visao.sql", "  UNIQUE (loja_id, marcador_id)\n", "  CHECK (true)\n", "marcador_repetido"),
     ("V4 vazio só pela textura (sem a pista de cor)", "app/visao.py",
      "    if vazio_c and (vazio_t or r < LIMIAR_OCUPADO):", "    if vazio_t or vazio_c:", "perfurado or classifica_posicoes"),
+    ("L1 login sem bloqueio ao passar do limite", "0004_limite_login.sql",
+     "    ELSIF v_falhas > k.limite THEN", "    ELSIF false THEN", "limite_login"),
+    ("L2 login sem normalizar maiúsculas", "0004_limite_login.sql",
+     "  v_login text := lower(left(coalesce(p_login, ''), 60));\n  v_ip text := left(coalesce(p_ip, 'desconhecido'), 45);\n  k record;",
+     "  v_login text := left(coalesce(p_login, ''), 60);\n  v_ip text := left(coalesce(p_ip, 'desconhecido'), 45);\n  k record;", "maiusculas"),
+    ("L3 login verifica a senha mesmo bloqueado", "app/api.py", "            if espera > 0:", "            if False:", "senha_certa_passa"),
     ("V5 referência sem verificação de hash", "app/visao.py",
      "        if hashlib.sha256(dados).hexdigest() != sha:", "        if False:", "adulterada"),
 ]

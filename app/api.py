@@ -123,8 +123,17 @@ def criar_app(cfg: Config | None = None) -> FastAPI:
         return {"banco": "ok"}
 
     @app.post("/sessao")
-    def entrar(dados: Login, response: Response):
+    def entrar(dados: Login, request: Request, response: Response):
+        ip = request.client.host if request.client else "desconhecido"
         try:
+            # A tentativa é contada e confirmada antes de olhar a senha: uma falha posterior
+            # (inclusive um rollback) não pode apagar a contagem.
+            with pool.connection() as c:
+                espera = c.execute("SELECT op.tentar_login(%s, %s)", (dados.login, ip)).fetchone()[0]
+            if espera > 0:
+                # Mesma resposta para conta existente ou não, e sem verificar a senha.
+                raise HTTPException(429, {"erro": "muitas tentativas; tente novamente mais tarde"},
+                                    headers={"Retry-After": str(espera)})
             with pool.connection() as c:
                 r = c.execute("""SELECT u.id, cr.senha_hash FROM op.usuario u JOIN op.credencial cr ON cr.usuario_id = u.id
                                   WHERE u.login = %s AND u.ativo""", (dados.login,)).fetchone()
@@ -135,6 +144,7 @@ def criar_app(cfg: Config | None = None) -> FastAPI:
                     ok = False
                 if not ok:
                     raise HTTPException(401, {"erro": "login ou senha inválidos"})
+                c.execute("SELECT op.login_bem_sucedido(%s, %s)", (dados.login, ip))
                 token = secrets.token_urlsafe(32)
                 c.execute("INSERT INTO op.sessao (token_sha256, usuario_id, expira_em) VALUES (%s, %s, now() + %s * interval '1 hour')",
                           (hashlib.sha256(token.encode()).hexdigest(), r[0], cfg.sessao_horas))

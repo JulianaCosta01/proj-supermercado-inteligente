@@ -35,7 +35,8 @@ Padrão de comentários e commits: [CONTRIBUTING.md](CONTRIBUTING.md).
 | Visão B1: marcadores, perspectiva, falhas de imagem, 2 pistas | sim | 26 testes sintéticos + 6 de ponta a ponta | não executado |
 | Planta 2D integrada (estados, painel, ações, foto) | sim | 18 testes, incluindo Chromium real | não executado |
 | Worker isolado (sem rede, raiz só leitura, sem capabilities, uid 10001) | sim | 2 testes em contêiner Docker | não executado |
-| Banco, API, importação, worker, regra, reconciliação (entregas anteriores) | sim | sim | não executado |
+| Banco, API, importação, worker, regra, reconciliação | sim | sim | não executado |
+| Limite de tentativas de login (conta+IP, conta, IP) | sim | 10 testes, incluindo tentativas paralelas | não executado |
 | **Validação com fotos reais** | roteiro pronto | **não feita: não há fotos reais** | — |
 | Imagem Docker construída a partir do Dockerfile | Dockerfile pronto | **não**: o ambiente de desenvolvimento não acessa registros de imagens | job pronto |
 
