@@ -17,6 +17,10 @@ EMAIL_X = "fulano.silva" + "@" + "gmail.com"
 CPF_X = "123.456" + ".789-09"
 
 
+TIPOS_IDS = {"chave privada", "token do GitHub", "URL de conexão com senha", "valor de credencial", "variável de credencial",
+             "senha em SQL", "e-mail", "caminho pessoal de máquina", "CPF", "link de sessão"}
+
+
 def git(repo, *args, email=NOREPLY, msg_env=None):
     env = {"GIT_AUTHOR_NAME": "Teste", "GIT_AUTHOR_EMAIL": email, "GIT_COMMITTER_NAME": "Teste",
            "GIT_COMMITTER_EMAIL": email, "PATH": "/usr/bin:/bin:/usr/local/bin", "HOME": str(repo)}
@@ -74,7 +78,7 @@ def test_repositorio_limpo_passa(repo):
     ("docs/notas2.md", "arquivo em C:" + "\\Users\\fulano\\Desktop\\x\n", "caminho pessoal de máquina"),
     ("dados/clientes.md", f"CPF {CPF_X}\n", "CPF"),
     ("docs/log.md", "veja claude.ai/code/" + "session_ABC123def\n", "link de sessão"),
-])
+], ids=lambda v: v if v in TIPOS_IDS else "")   # o id do teste não pode conter o valor plantado
 def test_detecta_segredos_e_dados_pessoais(repo, nome, conteudo, tipo):
     commit(repo, {nome: conteudo})
     codigo, saida = verificar(repo)
