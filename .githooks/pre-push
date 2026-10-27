@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+"""Antes do push, verifica o histórico inteiro de cada ramo enviado (um segredo apagado continua no histórico)."""
+import pathlib
+import subprocess
+import sys
+
+raiz = pathlib.Path(__file__).resolve().parents[1]
+zero = "0" * 40
+for linha in sys.stdin:
+    ref_local, sha_local, _ref_remota, _sha_remota = linha.split()
+    if sha_local == zero:
+        continue                                    # remoção de ramo remoto: nada a enviar
+    r = subprocess.run([sys.executable, str(raiz / "scripts" / "verificar_publicacao.py"), "--historico", sha_local], cwd=raiz)
+    if r.returncode != 0:
+        sys.stderr.write(f"push recusado: {ref_local} não passou na verificação de publicação\n")
+        sys.exit(1)

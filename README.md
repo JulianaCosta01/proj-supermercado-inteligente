@@ -11,7 +11,7 @@ e mostra o resultado numa planta 2D. Uma pessoa confirma; o sistema nunca chama 
     migrations/     migrações Alembic (SQL em migrations/sql/)
     tests/          db/ (invariantes), app/ (API, worker, planta), visao/ (imagens sintéticas),
                     isolamento/ (worker em contêiner), sintetico.py (gerador de fotos sintéticas)
-    scripts/        mutações, avaliação sintética, validação com fotos reais, folha de marcadores
+    scripts/        mutações, verificação de publicação, avaliação sintética, validação com fotos reais, marcadores
     docs/           evidências dos testes (docs/evidencias/)
     Dockerfile, compose.yaml
 
@@ -37,6 +37,7 @@ Padrão de comentários e commits: [CONTRIBUTING.md](CONTRIBUTING.md).
 | Worker isolado (sem rede, raiz só leitura, sem capabilities, uid 10001) | sim | 2 testes em contêiner Docker | não executado |
 | Banco, API, importação, worker, regra, reconciliação | sim | sim | não executado |
 | Limite de tentativas de login (conta+IP, conta, IP) | sim | 10 testes, incluindo tentativas paralelas | não executado |
+| Verificação de publicação (hooks e CI) | sim | 25 testes com repositórios plantados | não executado |
 | **Validação com fotos reais** | roteiro pronto | **não feita: não há fotos reais** | — |
 | Imagem Docker construída a partir do Dockerfile | Dockerfile pronto | **não**: o ambiente de desenvolvimento não acessa registros de imagens | job pronto |
 
@@ -64,6 +65,7 @@ Sugestão mínima: 30 fotos em 3 horários, com 20% das posições vazias, anota
 ## Rodar os testes
 
     pip install -r requirements-dev.txt && python -m playwright install chromium
+    git config core.hooksPath .githooks                       # verificação de commits e de publicação
     # PostgreSQL 16 DESCARTÁVEL: a suíte apaga e recria o banco "stp" e os papéis stp_*
     export STP_PG_HOST=localhost STP_PG_PORT=5432 STP_PG_USER=postgres STP_PG_PASSWORD=... STP_PG_DESCARTAVEL=1
     python -m pytest -q tests                                   # recria o banco "stp" e os papéis stp_*

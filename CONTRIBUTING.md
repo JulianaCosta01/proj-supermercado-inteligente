@@ -38,3 +38,14 @@ security: restringe o acesso às capturas por loja
 O hook em `.githooks/commit-msg` verifica o formato. Para ativar no seu clone:
 
     git config core.hooksPath .githooks
+
+## O que pode ser publicado
+
+Tudo que entra no repositório é público, inclusive testes, capturas de tela e o histórico.
+
+- Credenciais só fictícias, usadas em bancos descartáveis e registradas em `.publicacao-permitidos`.
+- Nenhum dado real de loja, foto de pessoas ou captura de tela sem revisão.
+- Documentos internos (auditorias, planos, relatórios de risco) ficam fora do repositório.
+- Binários novos entram em `.publicacao-permitidos` com o SHA-256, depois de revisados.
+
+Os hooks `pre-commit` e `pre-push` executam `scripts/verificar_publicacao.py` automaticamente.

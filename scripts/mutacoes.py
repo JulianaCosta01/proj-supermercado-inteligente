@@ -51,6 +51,12 @@ MUTACOES = [
      "  v_login text := lower(left(coalesce(p_login, ''), 60));\n  v_ip text := left(coalesce(p_ip, 'desconhecido'), 45);\n  k record;",
      "  v_login text := left(coalesce(p_login, ''), 60);\n  v_ip text := left(coalesce(p_ip, 'desconhecido'), 45);\n  k record;", "maiusculas"),
     ("L3 login verifica a senha mesmo bloqueado", "app/api.py", "            if espera > 0:", "            if False:", "senha_certa_passa"),
+    ("P1 binário sem exigir aprovação", "scripts/verificar_publicacao.py",
+     "        if hashlib.sha256(dados).hexdigest() not in binarios_ok.get(caminho, set()):", "        if False:", "binario_precisa"),
+    ("P2 documentos Word liberados", "scripts/verificar_publicacao.py",
+     r'    (re.compile(r"\.docx?$", re.I), "documento Word', r'    (re.compile(r"^$"), "documento Word', "bloqueia_arquivos_proibidos"),
+    ("P3 histórico verificado só no último commit", "scripts/verificar_publicacao.py",
+     '    commits = git("rev-list", *revs).decode().split()', '    commits = git("rev-list", "-n1", *revs).decode().split()', "apagado_continua"),
     ("V5 referência sem verificação de hash", "app/visao.py",
      "        if hashlib.sha256(dados).hexdigest() != sha:", "        if False:", "adulterada"),
 ]

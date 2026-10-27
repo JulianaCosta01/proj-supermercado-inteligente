@@ -1,0 +1,8 @@
+#!/usr/bin/env python3
+"""Recusa o commit se os arquivos preparados contiverem segredos, dados pessoais ou arquivos internos."""
+import pathlib
+import subprocess
+import sys
+
+raiz = pathlib.Path(__file__).resolve().parents[1]
+sys.exit(subprocess.run([sys.executable, str(raiz / "scripts" / "verificar_publicacao.py"), "--indice"], cwd=raiz).returncode)

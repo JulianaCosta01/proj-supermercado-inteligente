@@ -1,0 +1,16 @@
+# Itens revisados manualmente e liberados para publicação.
+# binario <sha256> <caminho>: cada versão de um arquivo binário precisa ser aprovada.
+# ficticio <valor>: credenciais de teste usadas só em bancos descartáveis criados pelos testes.
+
+# Capturas da planta com dados sintéticos (revisadas: sem dados pessoais, sem metadados).
+binario 907361a83ba4c896f8ce6ff02ecb33c561792272e72bfe4f67905d4a29095db2 docs/evidencias/planta_confirmada.png
+binario 04078d123fbff44cd233914e032ed6259ef72533d9de1eed77b9ebd40bba9484 docs/evidencias/planta_possivel_divergencia.png
+binario 36f574420c8ee67032a2ce6e0736dcbfaf6d374923321c0a42a4b24e1d0723e4 docs/evidencias/planta_confirmada.png
+binario c43089ab79e50b8ad5066891749de56980dc71ba50ba1a128a1fff671a5a57cc docs/evidencias/planta_possivel_divergencia.png
+
+ficticio teste-somente-local
+ficticio senha-de-teste-123
+ficticio ci-somente-teste
+ficticio worker-iso-teste
+ficticio migrador-iso-teste
+ficticio senha-inexistente-para-tempo-constante
