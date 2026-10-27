@@ -20,6 +20,7 @@ import psycopg
 from psycopg.types.json import Jsonb
 
 from app import regras
+from app.metodos import ImagemInadequada
 from app.config import Config
 
 log = logging.getLogger("stp.worker")
@@ -96,12 +97,24 @@ class Worker:
 
         try:
             captura, posicoes = self._contexto(captura_id)
-            obs = self.metodo.classificar(destino, captura, posicoes)
-            alertas = self._alertas(captura, posicoes, obs)
-            self.conn.execute("SELECT op.concluir_captura(%s, %s, %s, %s, %s, %s, %s)",
-                              (captura_id, token, rel, sha, self.metodo_id,
-                               Jsonb([{"posicao_id": p, "classe": c, "confianca": conf} for p, c, conf in obs]),
-                               Jsonb(alertas)))
+            try:
+                obs = self.metodo.classificar(destino, captura, posicoes)
+            except ImagemInadequada as e:
+                self._recusar(captura_id, token, f"imagem_inadequada: {e.motivo}"[:200], quarentena)
+                return "recusada"
+            alin = getattr(self.metodo, "ultimo_alinhamento", None)
+            # Foto inteira inadequada (ex.: tremida, marcadores insuficientes): registra as observações
+            # inconclusivas e a situação da foto, mas não abre alertas; a planta mostra "foto inadequada".
+            alertas = [] if (alin is not None and alin.situacao != "alinhada") else self._alertas(captura, posicoes, obs)
+            obs_json = Jsonb([{"posicao_id": p, "classe": c, "confianca": conf} for p, c, conf in obs])
+            if alin is None:
+                self.conn.execute("SELECT op.concluir_captura(%s, %s, %s, %s, %s, %s, %s)",
+                                  (captura_id, token, rel, sha, self.metodo_id, obs_json, Jsonb(alertas)))
+            else:
+                self.conn.execute("SELECT op.concluir_captura(%s::bigint, %s::uuid, %s::text, %s::text, %s::bigint, %s::jsonb, %s::jsonb, "
+                                  "%s::bigint, %s::text, %s::smallint, %s::numeric, %s::jsonb)",
+                                  (captura_id, token, rel, sha, self.metodo_id, obs_json, Jsonb(alertas),
+                                   alin.face_id, alin.situacao, alin.marcadores, alin.erro_mm, Jsonb(alin.metricas)))
         except psycopg.Error as e:
             if e.sqlstate == "STP10":
                 log.info("captura %s: reserva perdida, resultado descartado", captura_id)
@@ -125,10 +138,20 @@ class Worker:
     def _contexto(self, captura_id):
         c = self.conn.execute("""SELECT c.id, c.loja_id, c.capturado_em, (c.capturado_em AT TIME ZONE l.fuso)::date, l.max_idade_snapshot_dias
                                    FROM op.captura c JOIN op.loja l ON l.id = c.loja_id WHERE c.id = %s""", (captura_id,)).fetchone()
-        captura = {"id": c[0], "loja_id": c[1], "capturado_em": c[2], "dia": c[3], "max_idade": c[4]}
-        posicoes = [{"posicao_id": p, "codigo": cod, "produto_id": prod, "inicio_vigencia": ini}
-                    for p, cod, prod, ini in self.conn.execute(
-                        """SELECT p.id, p.codigo, pv.produto_id, lower(pv.vigencia) FROM op.posicao p
+        captura = {"id": c[0], "loja_id": c[1], "capturado_em": c[2], "dia": c[3], "max_idade": c[4], "faces": {}}
+        for fid, larg, alt, dic, tam, ref in self.conn.execute(
+                """SELECT id, largura_mm, altura_mm, aruco_dicionario, marcador_tamanho_mm, referencia_sha256
+                     FROM op.face_gondola WHERE loja_id = %s""", (c[1],)).fetchall():
+            captura["faces"][fid] = {"largura_mm": larg, "altura_mm": alt, "aruco_dicionario": dic,
+                                     "marcador_tamanho_mm": tam, "referencia_sha256": ref, "marcadores": []}
+        for fid, mid, x, y in self.conn.execute(
+                "SELECT face_id, marcador_id, x_mm, y_mm FROM op.face_marcador WHERE loja_id = %s", (c[1],)).fetchall():
+            captura["faces"][fid]["marcadores"].append({"id": mid, "x_mm": x, "y_mm": y})
+        posicoes = [{"posicao_id": p, "codigo": cod, "produto_id": prod, "inicio_vigencia": ini,
+                     "face_id": f, "x_mm": x, "y_mm": y, "largura_mm": w, "altura_mm": h}
+                    for p, cod, prod, ini, f, x, y, w, h in self.conn.execute(
+                        """SELECT p.id, p.codigo, pv.produto_id, lower(pv.vigencia), p.face_id, p.x_mm, p.y_mm, p.largura_mm, p.altura_mm
+                             FROM op.posicao p
                              JOIN op.planograma_vigencia pv ON pv.posicao_id = p.id AND pv.vigencia @> %s
                             WHERE p.loja_id = %s""", (c[2], c[1])).fetchall()]
         return captura, posicoes

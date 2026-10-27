@@ -39,6 +39,16 @@ MUTACOES = [
      "    DELETE FROM op.sessao WHERE usuario_id = NEW.id;", "    NULL;", "desativar_usuario"),
     ("A8 worker apaga quarentena antes do commit", "app/worker.py",
      "        try:\n            captura, posicoes = self._contexto(captura_id)", "        quarentena.unlink()\n        try:\n            captura, posicoes = self._contexto(captura_id)", "queda_no_meio"),
+    # ---- visão
+    ("V1 sem bloqueio de foto desfocada", "app/visao.py",
+     "        if nit < max(NITIDEZ_ABSOLUTA_MIN, NITIDEZ_RELATIVA_MIN * nit_ref):", "        if False:", "imagem_ruim_vira_inconclusivo"),
+    ("V2 foto inadequada ainda abre alertas", "app/worker.py",
+     'alertas = [] if (alin is not None and alin.situacao != "alinhada") else', "alertas =", "tremida_registra_situacao"),
+    ("V3 marcador repetido entre faces aceito", "0003_visao.sql", "  UNIQUE (loja_id, marcador_id)\n", "  CHECK (true)\n", "marcador_repetido"),
+    ("V4 vazio só pela textura (sem a pista de cor)", "app/visao.py",
+     "    if vazio_c and (vazio_t or r < LIMIAR_OCUPADO):", "    if vazio_t or vazio_c:", "perfurado or classifica_posicoes"),
+    ("V5 referência sem verificação de hash", "app/visao.py",
+     "        if hashlib.sha256(dados).hexdigest() != sha:", "        if False:", "adulterada"),
 ]
 
 

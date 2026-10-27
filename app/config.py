@@ -25,8 +25,10 @@ class Config:
     def tmp(self): return self.dir_dados / "tmp"
     @property
     def lixeira(self): return self.dir_dados / "lixeira"
+    @property
+    def referencias(self): return self.dir_dados / "referencias"
 
     def preparar_diretorios(self):
-        for d in (self.quarentena, self.imagens, self.tmp, self.lixeira):
+        for d in (self.quarentena, self.imagens, self.tmp, self.lixeira, self.referencias):
             d.mkdir(parents=True, exist_ok=True)
             os.chmod(d, 0o700)

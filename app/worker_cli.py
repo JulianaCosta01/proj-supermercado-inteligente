@@ -1,28 +1,27 @@
-"""Processo do worker: python -m app.worker_cli --metodo pacote.modulo:Classe
+"""Processo do worker: python -m app.worker_cli  (método B1: marcadores ArUco + foto de referência)
 
 Laço simples: processa capturas enquanto houver; dorme quando a fila esvazia;
 roda a reconciliação a cada hora. Sem fila externa: a fila é a tabela op.captura.
 """
 import argparse
-import importlib
 import logging
 import time
 
 from app.config import Config
 from app.reconciliacao import reconciliar
+from app.visao import MetodoB1
 from app.worker import Worker
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--metodo", required=True, help="pacote.modulo:Classe do método de ocupação")
+    ap.add_argument("--metodo", choices=["b1"], default="b1", help="método de ocupação (b1: marcadores + referência)")
     ap.add_argument("--intervalo", type=float, default=5.0)
     a = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
-    mod, cls = a.metodo.split(":")
-    metodo = getattr(importlib.import_module(mod), cls)()
     cfg = Config()
     cfg.preparar_diretorios()
+    metodo = MetodoB1(cfg.referencias)
     w = Worker(cfg, metodo)
     proxima_reconciliacao = 0.0
     try:
