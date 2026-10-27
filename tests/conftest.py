@@ -33,6 +33,10 @@ LOGINS = {"stp_app_u": "stp_app", "stp_worker_u": "stp_worker"}
 
 def criar_banco(db=DB, sql_dir=None):
     """Recria o banco e os papéis e aplica as migrações (alembic upgrade head)."""
+    # A suíte apaga bancos e papéis do servidor: só roda com confirmação explícita de servidor descartável.
+    if os.environ.get("STP_PG_DESCARTAVEL") != "1":
+        pytest.exit("defina STP_PG_DESCARTAVEL=1 apenas em um PostgreSQL de teste: a suíte apaga e recria "
+                    "o banco e os papéis stp_*", returncode=4)
     with psycopg.connect(DSN_ADMIN, autocommit=True) as c:
         c.execute(f"DROP DATABASE IF EXISTS {db} WITH (FORCE)")
         for login in LOGINS:
@@ -56,7 +60,11 @@ def criar_banco(db=DB, sql_dir=None):
 
 
 @pytest.fixture(scope="session", autouse=True)
-def banco():
+def banco(request):
+    # Os testes de isolamento sobem o próprio PostgreSQL; rodando só eles, o banco principal não é necessário.
+    if request.session.items and all(i.get_closest_marker("isolamento") for i in request.session.items):
+        yield
+        return
     criar_banco(sql_dir=os.environ.get("STP_SQL_DIR"))
     yield
 

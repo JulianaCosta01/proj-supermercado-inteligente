@@ -64,7 +64,8 @@ Sugestão mínima: 30 fotos em 3 horários, com 20% das posições vazias, anota
 ## Rodar os testes
 
     pip install -r requirements-dev.txt && python -m playwright install chromium
-    export STP_PG_HOST=localhost STP_PG_PORT=5432 STP_PG_USER=postgres STP_PG_PASSWORD=...   # PostgreSQL 16 descartável
+    # PostgreSQL 16 DESCARTÁVEL: a suíte apaga e recria o banco "stp" e os papéis stp_*
+    export STP_PG_HOST=localhost STP_PG_PORT=5432 STP_PG_USER=postgres STP_PG_PASSWORD=... STP_PG_DESCARTAVEL=1
     python -m pytest -q tests                                   # recria o banco "stp" e os papéis stp_*
     python scripts/mutacoes.py                                  # cada proteção removida precisa ser detectada
     sudo -E python -m pytest -q tests/isolamento -m isolamento  # precisa de Docker
