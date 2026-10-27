@@ -52,6 +52,16 @@ tests/app/test_importacao.py::test_variacoes_aceitas[f\xf3rmula na descri\xe7\xe
 tests/app/test_importacao.py::test_relatorio_csv_neutraliza_formulas PASSED
 tests/app/test_importacao.py::test_relatorio_de_outra_loja PASSED
 tests/app/test_importacao.py::test_arquivo_grande_demais PASSED
+tests/app/test_limite_login.py::test_bloqueia_depois_de_cinco_falhas_e_nem_a_senha_certa_passa PASSED
+tests/app/test_limite_login.py::test_conta_inexistente_responde_igual PASSED
+tests/app/test_limite_login.py::test_variacao_de_maiusculas_conta_junto PASSED
+tests/app/test_limite_login.py::test_bloqueio_de_um_ip_nao_tranca_a_conta_para_outro PASSED
+tests/app/test_limite_login.py::test_ataque_distribuido_bloqueia_a_conta PASSED
+tests/app/test_limite_login.py::test_um_ip_varrendo_contas_e_bloqueado PASSED
+tests/app/test_limite_login.py::test_acerto_zera_o_contador_da_conta_no_ip PASSED
+tests/app/test_limite_login.py::test_bloqueio_expira PASSED
+tests/app/test_limite_login.py::test_tentativas_paralelas_nao_furam_o_limite PASSED
+tests/app/test_limite_login.py::test_aplicacao_nao_le_nem_altera_os_contadores PASSED
 tests/app/test_planta.py::test_estado_visual[args0-possivel_divergencia] PASSED
 tests/app/test_planta.py::test_estado_visual[args1-possivel_divergencia] PASSED
 tests/app/test_planta.py::test_estado_visual[args2-divergencia_confirmada] PASSED
@@ -179,6 +189,31 @@ tests/db/test_v051.py::test_w05_item_venenoso_vira_recusado PASSED
 tests/db/test_v051.py::test_w06_recusar_exige_token PASSED
 tests/db/test_v051.py::test_w07_worker_nao_escreve_direto PASSED
 tests/db/test_v051.py::test_w08_worker_nao_grava_em_outra_loja PASSED
+tests/publicacao/test_verificar_publicacao.py::test_repositorio_limpo_passa PASSED
+tests/publicacao/test_verificar_publicacao.py::test_detecta_segredos_e_dados_pessoais[--chave privada] PASSED
+tests/publicacao/test_verificar_publicacao.py::test_detecta_segredos_e_dados_pessoais[--token do GitHub] PASSED
+tests/publicacao/test_verificar_publicacao.py::test_detecta_segredos_e_dados_pessoais[--URL de conex\xe3o com senha] PASSED
+tests/publicacao/test_verificar_publicacao.py::test_detecta_segredos_e_dados_pessoais[--valor de credencial] PASSED
+tests/publicacao/test_verificar_publicacao.py::test_detecta_segredos_e_dados_pessoais[--vari\xe1vel de credencial] PASSED
+tests/publicacao/test_verificar_publicacao.py::test_detecta_segredos_e_dados_pessoais[--senha em SQL] PASSED
+tests/publicacao/test_verificar_publicacao.py::test_detecta_segredos_e_dados_pessoais[--e-mail] PASSED
+tests/publicacao/test_verificar_publicacao.py::test_detecta_segredos_e_dados_pessoais[--caminho pessoal de m\xe1quina] PASSED
+tests/publicacao/test_verificar_publicacao.py::test_detecta_segredos_e_dados_pessoais[--CPF] PASSED
+tests/publicacao/test_verificar_publicacao.py::test_detecta_segredos_e_dados_pessoais[--link de sess\xe3o] PASSED
+tests/publicacao/test_verificar_publicacao.py::test_bloqueia_arquivos_proibidos[.env-arquivo .env] PASSED
+tests/publicacao/test_verificar_publicacao.py::test_bloqueia_arquivos_proibidos[segredos/pg.txt-pasta de segredos] PASSED
+tests/publicacao/test_verificar_publicacao.py::test_bloqueia_arquivos_proibidos[pgpass_worker-arquivo de senha] PASSED
+tests/publicacao/test_verificar_publicacao.py::test_bloqueia_arquivos_proibidos[backup/stp.dump-dump, backup] PASSED
+tests/publicacao/test_verificar_publicacao.py::test_bloqueia_arquivos_proibidos[relatorio.pbix-planilha ou relat\xf3rio] PASSED
+tests/publicacao/test_verificar_publicacao.py::test_bloqueia_arquivos_proibidos[docs/auditoria.docx-documento Word] PASSED
+tests/publicacao/test_verificar_publicacao.py::test_bloqueia_arquivos_proibidos[deploy/servidor.pem-chave ou cofre] PASSED
+tests/publicacao/test_verificar_publicacao.py::test_segredo_apagado_continua_no_historico PASSED
+tests/publicacao/test_verificar_publicacao.py::test_binario_precisa_de_aprovacao_por_versao PASSED
+tests/publicacao/test_verificar_publicacao.py::test_imagem_com_gps PASSED
+tests/publicacao/test_verificar_publicacao.py::test_valor_ficticio_aprovado_passa PASSED
+tests/publicacao/test_verificar_publicacao.py::test_metadados_dos_commits PASSED
+tests/publicacao/test_verificar_publicacao.py::test_trailer_de_coautoria_na_mensagem PASSED
+tests/publicacao/test_verificar_publicacao.py::test_modo_indice_olha_so_o_que_vai_ser_commitado PASSED
 tests/visao/test_visao.py::test_classifica_posicoes_corretas[frontal-kw0] PASSED
 tests/visao/test_visao.py::test_classifica_posicoes_corretas[perspectiva moderada-kw1] PASSED
 tests/visao/test_visao.py::test_classifica_posicoes_corretas[perspectiva forte-kw2] PASSED
@@ -205,4 +240,4 @@ tests/visao/test_visao.py::test_referencia_adulterada_nao_e_usada PASSED
 tests/visao/test_visao.py::test_referencia_exige_quatro_marcadores PASSED
 tests/visao/test_visao.py::test_fundo_perfurado_nao_gera_vazio_confiante_errado PASSED
 tests/visao/test_visao.py::test_roteiro_de_validacao_real_funciona PASSED
-================= 206 passed, 2 deselected in 71.24s (0:01:11) =================
+================= 241 passed, 2 deselected in 77.08s (0:01:17) =================

@@ -1,22 +1,28 @@
 Executado em 27/10/2026 (PostgreSQL 16.15, Python 3.13.18, OpenCV 5.0.0, Pillow 13.0.0)
-detectada   M1 sem checagem de NULL na transição: 1 failed, 207 deselected in 1.59s
-detectada   M2 sem frescor do snapshot: 2 failed, 206 deselected in 1.69s
-detectada   M3 sem cerca por token (versão vigente da função, migração 0002): 1 failed, 207 deselected in 2.70s
-detectada   M4 função sem search_path: 1 failed, 207 deselected in 1.54s
-detectada   M5 sem privilégio padrão fechado: 2 failed, 206 deselected in 1.34s
-detectada   M6 TEMPORARY para PUBLIC: 3 failed, 205 deselected in 1.47s
-detectada   M7 sem REVOKE da função de transição (worker confirmaria): 1 failed, 207 deselected in 1.43s
-detectada   M8 sem restrição de exclusão do planograma: 1 failed, 207 deselected in 1.70s
-detectada   A1 conclusão sem ON CONFLICT (alerta repetido derruba a captura): 1 failed, 207 deselected in 2.84s
-detectada   A2 upload sem a verificação final de assinatura: 1 failed, 5 passed, 202 deselected in 3.67s
-detectada   A3 regra sem margem: 2 failed, 17 passed, 189 deselected in 1.56s
-detectada   A4 reconciliação sem trava: 1 failed, 207 deselected in 2.70s
-detectada   A5 reconciliação ignora falha do banco: 1 failed, 207 deselected in 1.50s
-detectada   A6 importação grava linhas válidas mesmo com erro: 17 failed, 191 deselected in 6.54s
-detectada   A7 desativar usuário sem derrubar sessões (gatilho): 1 failed, 207 deselected in 2.24s
-detectada   A8 worker apaga quarentena antes do commit: 1 failed, 207 deselected in 3.98s
-detectada   V1 sem bloqueio de foto desfocada: 2 failed, 5 passed, 201 deselected in 7.78s
-detectada   V2 foto inadequada ainda abre alertas: 1 failed, 207 deselected in 3.80s
-detectada   V3 marcador repetido entre faces aceito: 1 failed, 207 deselected in 1.63s
-detectada   V4 vazio só pela textura (sem a pista de cor): 9 failed, 1 passed, 198 deselected in 10.95s
-detectada   V5 referência sem verificação de hash: 1 failed, 207 deselected in 2.69s
+detectada   M1 sem checagem de NULL na transição: 1 failed, 242 deselected in 1.60s
+detectada   M2 sem frescor do snapshot: 2 failed, 241 deselected in 1.66s
+detectada   M3 sem cerca por token (versão vigente da função, migração 0002): 1 failed, 242 deselected in 2.78s
+detectada   M4 função sem search_path: 1 failed, 242 deselected in 1.56s
+detectada   M5 sem privilégio padrão fechado: 2 failed, 241 deselected in 1.49s
+detectada   M6 TEMPORARY para PUBLIC: 3 failed, 240 deselected in 1.68s
+detectada   M7 sem REVOKE da função de transição (worker confirmaria): 1 failed, 242 deselected in 1.71s
+detectada   M8 sem restrição de exclusão do planograma: 1 failed, 242 deselected in 1.65s
+detectada   A1 conclusão sem ON CONFLICT (alerta repetido derruba a captura): 1 failed, 242 deselected in 2.22s
+detectada   A2 upload sem a verificação final de assinatura: 1 failed, 5 passed, 237 deselected in 3.10s
+detectada   A3 regra sem margem: 2 failed, 17 passed, 224 deselected in 1.73s
+detectada   A4 reconciliação sem trava: 1 failed, 242 deselected in 2.45s
+detectada   A5 reconciliação ignora falha do banco: 1 failed, 242 deselected in 1.43s
+detectada   A6 importação grava linhas válidas mesmo com erro: 17 failed, 226 deselected in 5.51s
+detectada   A7 desativar usuário sem derrubar sessões (gatilho): 1 failed, 242 deselected in 1.80s
+detectada   A8 worker apaga quarentena antes do commit: 1 failed, 242 deselected in 3.18s
+detectada   V1 sem bloqueio de foto desfocada: 2 failed, 5 passed, 236 deselected in 7.15s
+detectada   V2 foto inadequada ainda abre alertas: 1 failed, 242 deselected in 3.02s
+detectada   V3 marcador repetido entre faces aceito: 1 failed, 242 deselected in 1.70s
+detectada   V4 vazio só pela textura (sem a pista de cor): 9 failed, 1 passed, 233 deselected in 9.99s
+detectada   L1 login sem bloqueio ao passar do limite: 7 failed, 3 passed, 233 deselected in 16.22s
+detectada   L2 login sem normalizar maiúsculas: 1 failed, 242 deselected in 2.60s
+detectada   L3 login verifica a senha mesmo bloqueado: 1 failed, 242 deselected in 2.44s
+detectada   P1 binário sem exigir aprovação: 1 failed, 242 deselected in 1.96s
+detectada   P2 documentos Word liberados: 1 failed, 6 passed, 236 deselected in 2.17s
+detectada   P3 histórico verificado só no último commit: 1 failed, 242 deselected in 1.65s
+detectada   V5 referência sem verificação de hash: 1 failed, 242 deselected in 2.26s

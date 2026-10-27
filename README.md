@@ -42,7 +42,7 @@ Padrão de comentários, commits e publicação: [CONTRIBUTING.md](CONTRIBUTING.
 | **Validação com fotos reais** | roteiro pronto | **não feita: não há fotos reais** | — |
 | Imagem Docker construída a partir do Dockerfile | Dockerfile pronto | **não**: o ambiente de desenvolvimento não acessa registros de imagens | job pronto |
 
-Totais locais: **206 testes** + 2 de isolamento aprovados; **21 de 21 mutações detectadas**; `pip-audit` sem vulnerabilidades conhecidas.
+Totais locais: **241 testes** + 2 de isolamento aprovados; **27 de 27 mutações detectadas**; `pip-audit` sem vulnerabilidades conhecidas.
 Evidências em `docs/evidencias/` (execuções, mutações, avaliação sintética, isolamento, capturas de tela da planta).
 
 ## Limitações conhecidas (objetivas)
