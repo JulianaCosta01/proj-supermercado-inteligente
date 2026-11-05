@@ -1,91 +1,174 @@
-# Shelf-to-Profit
+# SUPERMERCADO INTELIGENTE
 
-Detecta **possíveis divergências** entre o que a foto da gôndola mostra e o estoque registrado,
-e mostra o resultado numa planta 2D. Uma pessoa confirma; o sistema nunca chama de ruptura algo não confirmado.
+<div align="center">
 
-## Estrutura
+**VISÃO COMPUTACIONAL · MONITORAMENTO DE GÔNDOLAS · INTELIGÊNCIA DE ESTOQUE**
 
-    app/            API, worker, visão (B1), regra de alerta, importação, reconciliação, planta
-    app/ui/         planta 2D (HTML + JS sem dependências, servida em /ui/)
-    db/             papéis do PostgreSQL e pg_hba do piloto
-    migrations/     migrações Alembic (SQL em migrations/sql/)
-    tests/          db/ (invariantes), app/ (API, worker, planta), visao/ (imagens sintéticas),
-                    isolamento/ (worker em contêiner), sintetico.py (gerador de fotos sintéticas)
-    scripts/        mutações, verificação de publicação, avaliação sintética, validação com fotos reais, marcadores
-    docs/           arquitetura.md, seguranca.md e evidências dos testes (docs/evidencias/)
-    Dockerfile, compose.yaml
+Identificação de possíveis divergências entre imagens de gôndolas e o estoque registrado, com visualização dos resultados em uma planta 2D.
 
-Arquitetura: [docs/arquitetura.md](docs/arquitetura.md). Segurança: [docs/seguranca.md](docs/seguranca.md).
-Padrão de comentários, commits e publicação: [CONTRIBUTING.md](CONTRIBUTING.md).
+<br/>
 
-## Como a visão funciona (método B1-referencia 1.0.0)
+![Python](https://img.shields.io/badge/Python-29263F?style=for-the-badge&logo=python&logoColor=C6A8E8)
+![OpenCV](https://img.shields.io/badge/OpenCV-29263F?style=for-the-badge&logo=opencv&logoColor=D8C59A)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-29263F?style=for-the-badge&logo=postgresql&logoColor=C6A8E8)
+![Docker](https://img.shields.io/badge/Docker-29263F?style=for-the-badge&logo=docker&logoColor=C6A8E8)
 
-1. Cada face de gôndola tem 4 marcadores ArUco impressos (ids únicos na loja) e a geometria das posições em mm.
-2. Uma foto da face abastecida vira a **referência** (`python -m app.cadastro referencia ...`).
-3. Em cada foto: detecta os marcadores, identifica a face, corrige a perspectiva (homografia) e
-   verifica erro de alinhamento, resolução, exposição e nitidez.
-4. Para cada posição compara com a referência duas pistas: **textura** (bordas) e **cor por faixas** (matiz/saturação).
-   Só há confiança alta quando as duas concordam.
-5. Foto sem marcadores → captura recusada. Foto ruim → todas as posições "indeterminado", **sem alertas**,
-   e a planta mostra a situação da foto. Confiança abaixo de 0,80 → no máximo alerta "verificar" (V).
+</div>
 
-## Estado (27/10/2026)
+---
 
-| Item | Implementado | Testado localmente | CI (GitHub) |
-|---|---|---|---|
-| Visão B1: marcadores, perspectiva, falhas de imagem, 2 pistas | sim | 26 testes sintéticos + 6 de ponta a ponta | não executado |
-| Planta 2D integrada (estados, painel, ações, foto) | sim | 18 testes, incluindo Chromium real | não executado |
-| Worker isolado (sem rede, raiz só leitura, sem capabilities, uid 10001) | sim | 2 testes em contêiner Docker | não executado |
-| Banco, API, importação, worker, regra, reconciliação | sim | sim | não executado |
-| Limite de tentativas de login (conta+IP, conta, IP) | sim | 10 testes, incluindo tentativas paralelas | não executado |
-| Verificação de publicação (hooks e CI) | sim | 25 testes com repositórios plantados | não executado |
-| **Validação com fotos reais** | roteiro pronto | **não feita: não há fotos reais** | — |
-| Imagem Docker construída a partir do Dockerfile | Dockerfile pronto | **não**: o ambiente de desenvolvimento não acessa registros de imagens | job pronto |
+## 01. Visão geral
 
-Totais locais: **241 testes** + 2 de isolamento aprovados; **27 de 27 mutações detectadas**; `pip-audit` sem vulnerabilidades conhecidas.
-Evidências em `docs/evidencias/` (execuções, mutações, avaliação sintética, isolamento, capturas de tela da planta).
+O projeto analisa imagens de gôndolas e compara as posições dos produtos com uma referência visual cadastrada. As possíveis divergências são organizadas em uma **planta 2D**, permitindo acompanhar posições, imagens e ocorrências.
 
-## Limitações conhecidas (objetivas)
+**Uma possível divergência não é uma ruptura confirmada.** O sistema analisa as imagens e pode recomendar uma verificação, mas a confirmação permanece sob responsabilidade humana.
 
-- **Nenhuma métrica de loja existe.** Os números de `avaliacao_sintetica.txt` vêm de fotos geradas; servem para regressão, não para afirmar precisão.
-- **Fundo texturizado (painel perfurado):** nas cenas sintéticas, todos os vazios reais ficaram com confiança baixa (viram V ou nada). O método erra para o lado seguro, mas perde as divergências.
-- **Embalagens parecidas com o fundo** (cinza, branco, sem estampa) e **produto trocado** tendem a "parcial"/confiança baixa.
-- **Limiares calibrados só em imagens sintéticas** (nitidez, exposição, textura, cor). Precisam ser recalibrados com fotos reais.
-- **Referência por face:** mudança de embalagem ou de planograma exige nova foto de referência.
-- O teste de isolamento local usa um contêiner com o Python do host montado só para leitura; ele valida os controles (rede, raiz, capabilities, banco), não a imagem do Dockerfile. O job de CI faz o teste com a imagem construída.
+## 02. Como funciona
 
-## Próximo passo para uma demonstração confiável
+1. **Identificação:** quatro marcadores ArUco identificam cada face da gôndola.
+2. **Alinhamento:** a perspectiva é corrigida por homografia.
+3. **Validação:** resolução, exposição, nitidez e alinhamento são verificados.
+4. **Comparação:** cada posição é analisada por duas pistas: textura (bordas) e cor (matiz e saturação).
+5. **Classificação:** a confiança determina se existe evidência suficiente para sugerir uma verificação.
+6. **Visualização:** os resultados aparecem na planta 2D para análise humana.
 
-Fotografar uma gôndola real (ou montada pela equipe) com os marcadores impressos e rodar:
+### Regras da análise
 
-    python scripts/gerar_marcadores.py --ids 0 1 2 3 --tamanho-mm 60 --saida marcadores.pdf   # imprimir em 100%
-    python scripts/validar_fotos_reais.py pasta_da_validacao/   # face.json, referencia.jpg, fotos/, anotacoes.csv
+- Sem marcadores: captura recusada.
+- Imagem inadequada: posições indeterminadas, sem alertas.
+- Confiança abaixo de `0,80`: no máximo, alerta de verificação (V).
+- Confiança alta: exige concordância entre as duas pistas visuais.
 
-Sugestão mínima: 30 fotos em 3 horários, com 20% das posições vazias, anotadas por uma pessoa.
+<sub>Método de visão computacional: B1-referencia 1.0.0</sub>
 
-## Rodar os testes
+## 03. Arquitetura
 
-    pip install -r requirements-dev.txt && python -m playwright install chromium
-    git config core.hooksPath .githooks                       # verificação de commits e de publicação
-    # PostgreSQL 16 DESCARTÁVEL: a suíte apaga e recria o banco "stp" e os papéis stp_*
-    export STP_PG_HOST=localhost STP_PG_PORT=5432 STP_PG_USER=postgres STP_PG_PASSWORD=... STP_PG_DESCARTAVEL=1
-    python -m pytest -q tests                                   # recria o banco "stp" e os papéis stp_*
-    python scripts/mutacoes.py                                  # cada proteção removida precisa ser detectada
-    sudo -E python -m pytest -q tests/isolamento -m isolamento  # precisa de Docker
-    python scripts/avaliar_sintetico.py 60
-    STP_EVIDENCIAS=docs/evidencias python -m pytest -q tests/app/test_planta.py   # regrava as capturas de tela
+```text
+app/
+├── API, worker e visão computacional (B1)
+├── regras de alerta e reconciliação
+├── importação
+└── planta 2D
 
-## Implantação (resumo)
+app/ui/       Interface HTML + JavaScript
+db/           PostgreSQL e configuração de acesso
+migrations/   Migrações Alembic e SQL
+tests/        Banco, API, visão, planta e isolamento
+scripts/      Avaliação, validação e mutações
+docs/         Arquitetura, segurança e evidências
 
-- `compose.yaml`: banco sem TCP; API e worker falam com ele **só por socket Unix**, com senha (scram), conforme `db/pg_hba.conf`.
-  Sem esse pg_hba, o padrão da imagem oficial (trust no socket) deixaria qualquer contêiner com o socket entrar como superusuário.
-- Arquivos `segredos/pgpass_app` e `segredos/pgpass_worker` no formato .pgpass, dono uid 10001, permissão 600.
-- Worker: `network_mode: none`, raiz somente leitura, `cap_drop: ALL`, `no-new-privileges`, limite de memória e de processos;
-  grava só em `quarentena` e `imagens`; `referencias` somente leitura.
-- API: publicada só em 127.0.0.1:8000, atrás do nginx (TLS e limites).
+Dockerfile
+compose.yaml
+```
 
-## Decisões registradas
+A interface é servida em `/ui/` e não depende de frameworks JavaScript externos.
 
-- Sem ORM (psycopg 3 + SQL); upload como corpo bruto; CSV canônico `codigo;ean;descricao;quantidade;data`.
-- Temporários e lixeira **dentro de cada área de dados**: renomear nunca cruza volumes, e cada volume é montado só onde é preciso.
-- Foto inadequada não gera alertas: a planta mostra a situação da foto em vez de encher a fila de "verificar".
+**Documentação técnica:**
+
+- [Arquitetura](docs/arquitetura.md)
+- [Segurança](docs/seguranca.md)
+- [Contribuição e publicação](CONTRIBUTING.md)
+
+## 04. Testes e resultados
+
+<sub>POSIÇÃO EM 27/10/2026</sub>
+
+| Verificação | Resultado local |
+|---|---:|
+| Visão computacional B1 | 26 testes sintéticos + 6 de ponta a ponta |
+| Planta 2D | 18 testes, incluindo Chromium |
+| Isolamento do worker | 2 testes em Docker |
+| Limite de tentativas de login | 10 testes |
+| Verificação de publicação | 25 testes |
+| Mutações detectadas | **27/27** |
+| `pip-audit` | Sem vulnerabilidades conhecidas |
+
+<badge color="success">241 testes + 2 de isolamento aprovados localmente</badge>
+
+**Ainda pendente:**
+
+- Validação com fotografias reais.
+- Construção e teste da imagem Docker a partir do Dockerfile.
+- Execução da CI no GitHub.
+
+As evidências estão disponíveis em `docs/evidencias/`.
+
+## 05. Limitações e próximos passos
+
+A avaliação atual utiliza imagens sintéticas. Portanto, os resultados ainda não representam métricas de precisão em ambiente comercial.
+
+Limitações identificadas:
+
+- Fundos texturizados podem reduzir a confiança na identificação de posições vazias.
+- Embalagens visualmente semelhantes ao fundo podem ser classificadas como parciais ou indeterminadas.
+- Produtos trocados podem não apresentar diferenças visuais suficientes.
+- Os limiares de análise precisam ser recalibrados com fotografias reais.
+- Alterações de embalagem ou planograma exigem uma nova referência da face.
+
+**Próxima etapa:** validar o método em uma gôndola real ou montada pela equipe, com 30 fotografias distribuídas em três horários, incluindo posições vazias e anotações humanas.
+
+### Preparar os marcadores e validar as fotografias
+
+```bash
+python scripts/gerar_marcadores.py --ids 0 1 2 3 --tamanho-mm 60 --saida marcadores.pdf
+
+python scripts/validar_fotos_reais.py pasta_da_validacao/
+```
+
+## 06. Executar os testes
+
+### Instalar dependências
+
+```bash
+pip install -r requirements-dev.txt
+python -m playwright install chromium
+```
+
+### Configurar o PostgreSQL
+
+A suíte utiliza PostgreSQL 16 descartável. **Ela apaga e recria o banco `stp` e os papéis `stp_*`. Não execute em um banco com dados importantes.**
+
+```bash
+export STP_PG_HOST=localhost
+export STP_PG_PORT=5432
+export STP_PG_USER=postgres
+export STP_PG_PASSWORD=...
+export STP_PG_DESCARTAVEL=1
+```
+
+### Executar a validação
+
+```bash
+python -m pytest -q tests
+python scripts/mutacoes.py
+python scripts/avaliar_sintetico.py 60
+```
+
+Teste de isolamento, que requer Docker:
+
+```bash
+sudo -E python -m pytest -q tests/isolamento -m isolamento
+```
+
+## 07. Segurança e implantação
+
+A arquitetura aplica isolamento entre API, banco e worker:
+
+- PostgreSQL sem TCP, com comunicação por socket Unix e autenticação SCRAM.
+- Worker sem rede, com raiz somente leitura, `cap_drop: ALL` e `no-new-privileges`.
+- Limites de memória e processos.
+- Acesso restrito às áreas de dados necessárias.
+- API publicada em `127.0.0.1:8000`, atrás do Nginx.
+- Segredos separados para API e worker, com permissões restritas.
+
+Detalhes e justificativas: [docs/seguranca.md](docs/seguranca.md).
+
+---
+
+<div align="center">
+
+**SUPERMERCADO INTELIGENTE**
+
+<sub>Visão computacional · Inteligência de estoque · Engenharia de software</sub>
+
+</div>
