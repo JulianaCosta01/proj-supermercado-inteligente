@@ -2,9 +2,9 @@
 
 <div align="center">
 
-**VISÃO COMPUTACIONAL · MONITORAMENTO DE GÔNDOLAS · INTELIGÊNCIA DE ESTOQUE**
+**VISÃO COMPUTACIONAL · MONITORAMENTO DE GÔNDOLAS · IA APLICADA À MODELAGEM DE SISTEMAS COMPLEXOS**
 
-Identificação de possíveis divergências entre imagens de gôndolas e o estoque registrado, com visualização dos resultados em uma planta 2D.
+Identificação de possíveis divergências entre imagens de gôndolas e o estoque registrado, com visualização dos resultados em uma planta 2D, que posteriormente será evoluída para um ecossistema 3D.
 
 <br/>
 
@@ -19,9 +19,9 @@ Identificação de possíveis divergências entre imagens de gôndolas e o estoq
 
 ## 01. Visão geral
 
-O projeto analisa imagens de gôndolas e compara as posições dos produtos com uma referência visual cadastrada. As possíveis divergências são organizadas em uma **planta 2D**, permitindo acompanhar posições, imagens e ocorrências.
+O projeto está em desenvolvimento e analisa imagens de gôndolas e compara as posições dos produtos com uma referência visual cadastrada. As possíveis divergências são organizadas em uma **planta 2D**, permitindo acompanhar posições, imagens e ocorrências.
 
-**Uma possível divergência não é uma ruptura confirmada.** O sistema analisa as imagens e pode recomendar uma verificação, mas a confirmação permanece sob responsabilidade humana.
+**Um possível empecilho não é uma ruptura confirmada.** O sistema analisa as imagens e pode recomendar uma verificação, mas a confirmação permanece sob responsabilidade humana.
 
 ## 02. Como funciona
 
