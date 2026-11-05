@@ -116,9 +116,7 @@ python scripts/validar_fotos_reais.py pasta_da_validacao/
 ```
 
 ## 06. Executar os testes
-
 ### Instalar dependências
-
 ```bash
 pip install -r requirements-dev.txt
 python -m playwright install chromium
